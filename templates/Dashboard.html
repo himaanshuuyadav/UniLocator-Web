@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniLocator - Track Your Devices</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/Dashboard.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">UniLocator</div>
+        <div class="nav-buttons">
+            <a href="{{ url_for('login') }}" class="btn btn-login">Log in</a>
+            <a href="{{ url_for('register') }}" class="btn btn-signup">Sign up</a>
+        </div>
+    </nav>
+
+    <main>
+        <div id="particles-js"></div>
+        <div class="hero">
+            <span class="tag">✨ Introducing UniLocator - The Ultimate Device Tracker</span>
+            <h1>UniLocator is the new way<br>to track your devices.</h1>
+            <p class="subtitle">
+                Seamlessly monitor and locate your devices in real-time with our powerful tracking solution.
+                Built with advanced technology for reliable device management.
+            </p>
+            <a href="{{ url_for('register') }}" class="btn btn-cta">Get Started for free →</a>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-map-marker-alt"></i>
+                <h3>Real-time Tracking</h3>
+                <p>Monitor your devices' locations with precision and accuracy</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-battery-full"></i>
+                <h3>Battery Monitoring</h3>
+                <p>Keep track of device battery levels and get low battery alerts</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-history"></i>
+                <h3>Location History</h3>
+                <p>Access detailed history of device movements and patterns</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="/static/particles-config.js"></script>
+    <script src="/static/smooth-scroll.js"></script>
+</body>
+</html>

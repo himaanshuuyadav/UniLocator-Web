@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniLocator Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/main.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-left">
+            <div class="logo">UniLocator</div>
+            <div class="nav-tabs">
+                <a href="#" class="tab active">My Devices</a>
+                <a href="#" class="tab">History</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="profile-dropdown">
+                <img src="/static/images/avatar.png" alt="Profile" class="avatar">
+                <div class="dropdown-content">
+                    <a href="#"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <hr>
+                    <a href="{{ url_for('logout') }}" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div id="particles-js"></div>
+        <div class="content">
+            <div class="welcome-section">
+                <h1>Welcome, <span class="username">{{ session['user_name'] }}</span></h1>
+                <p>Track and manage your devices from one place</p>
+                <button class="add-device-btn">
+                    <i class="fas fa-plus"></i> Add New Device
+                </button>
+            </div>
+
+            <div class="devices-grid">
+                <!-- Device cards will be dynamically added here -->
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="/static/particles-config.js"></script>
+    <script src="/static/main.js"></script>
+</body>
+</html>
