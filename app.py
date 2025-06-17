@@ -8,6 +8,8 @@ import io
 import base64
 import random
 import string
+import json
+from io import BytesIO  # Add this import
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'
@@ -134,52 +136,53 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Remove or comment out this route
+# @app.route("/")
+# @login_required
+# def index():
+#     ...
+
+# Update the home route to properly handle both logged-in and non-logged-in states
 @app.route("/")
-@login_required
-def index():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
+def home():
+    if 'user_id' in session:
+        # If user is logged in, get their devices
+        conn = sqlite3.connect('unilocator.db')
+        cursor = conn.cursor()
         
-    conn = sqlite3.connect('unilocator.db')
-    cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                SELECT device_code, device_name, connected_at, user_id
+                FROM connected_devices 
+                WHERE user_id = ?
+                ORDER BY connected_at DESC
+            """, (session['user_id'],))
+            
+            devices = cursor.fetchall()
+            device_list = []
+            for device in devices:
+                device_data = {
+                    "code": device[0],
+                    "name": device[1],
+                    "connected_at": device[2],
+                    "user_id": device[3],
+                    "location": device_locations.get(device[0], {"lat": 0.0, "lng": 0.0})
+                }
+                device_list.append(device_data)
+            
+            return render_template(
+                "index.html",
+                devices=device_list,
+                user_name=session.get('user_name', 'User')
+            )
+        except Exception as e:
+            print(f"Database error: {str(e)}")
+            return render_template("index.html", devices=[], error=str(e))
+        finally:
+            conn.close()
     
-    try:
-        # Get user's devices with debugging
-        cursor.execute("""
-            SELECT device_code, device_name, connected_at, user_id
-            FROM connected_devices 
-            WHERE user_id = ?
-            ORDER BY connected_at DESC
-        """, (session['user_id'],))
-        
-        devices = cursor.fetchall()
-        print(f"Raw devices from DB: {devices}")  # Debug print
-        
-        device_list = []
-        for device in devices:
-            device_data = {
-                "code": device[0],
-                "name": device[1],
-                "connected_at": device[2],
-                "user_id": device[3],
-                "location": device_locations.get(device[0], {"lat": 0.0, "lng": 0.0})
-            }
-            device_list.append(device_data)
-            print(f"Added device: {device_data}")  # Debug print
-        
-        return render_template(
-            "index.html",
-            devices=device_list,
-            user_name=session.get('user_name', 'User')
-        )
-        
-    except Exception as e:
-        print(f"Database error in index route: {str(e)}")
-        import traceback
-        print(traceback.format_exc())  # Detailed error trace
-        return render_template("index.html", devices=[], error=str(e))
-    finally:
-        conn.close()
+    # If user is not logged in, show the dashboard
+    return render_template("dashboard.html")
 
 @app.route("/device/<device_id>")
 def show_device_map(device_id):
@@ -235,93 +238,132 @@ def logout():
 @login_required
 def add_device():
     if request.method == 'POST':
-        # Generate a unique 8-character code
-        unique_code = secrets.token_urlsafe(6)
+        # Generate a unique 6-character code
+        unique_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
         user_id = session['user_id']
         
-        # Create connection data
+        # Create connection data with proper server URL
+        server_url = request.host_url.rstrip('/')  # Get the actual server URL
         connection_data = {
-            "server_url": "http://your-server:5000",
+            "server_url": server_url,
             "user_id": user_id,
             "device_code": unique_code
         }
         
-        # Generate QR code
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(json.dumps(connection_data))
-        qr.make(fit=True)
-        
-        # Create QR code image
-        img_buffer = BytesIO()
-        qr_image = qr.make_image(fill_color="black", back_color="white")
-        qr_image.save(img_buffer, format="PNG")
-        qr_code = base64.b64encode(img_buffer.getvalue()).decode()
-        
-        # Store the pending device code in database
-        conn = sqlite3.connect('unilocator.db')
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO pending_devices (user_id, device_code, created_at)
-            VALUES (?, ?, datetime('now'))
-        """, (user_id, unique_code))
-        conn.commit()
-        conn.close()
-        
-        return jsonify({
-            "unique_code": unique_code,
-            "qr_code": qr_code
-        })
+        try:
+            # Store the pending device code in database first
+            conn = sqlite3.connect('unilocator.db')
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO pending_devices (user_id, device_code, created_at)
+                VALUES (?, ?, datetime('now'))
+            """, (user_id, unique_code))
+            conn.commit()
+
+            # Generate QR code after successful database insertion
+            qr = qrcode.QRCode(version=1, box_size=10, border=5)
+            qr.add_data(json.dumps(connection_data))
+            qr.make(fit=True)
+            
+            # Create QR code image
+            img_buffer = BytesIO()
+            qr_image = qr.make_image(fill_color="black", back_color="white")
+            qr_image.save(img_buffer, format="PNG")
+            qr_code = base64.b64encode(img_buffer.getvalue()).decode()
+            
+            return jsonify({
+                "status": "success",
+                "unique_code": unique_code,
+                "qr_code": f"data:image/png;base64,{qr_code}"
+            })
+            
+        except sqlite3.IntegrityError:
+            # Handle case where code already exists
+            return jsonify({
+                "status": "error",
+                "message": "Failed to generate unique code, please try again"
+            }), 500
+        except Exception as e:
+            print(f"Error generating device code: {e}")
+            return jsonify({
+                "status": "error",
+                "message": str(e)
+            }), 500
+        finally:
+            if 'conn' in locals():
+                conn.close()
     
     return render_template("add_device.html")
 
 @app.route("/connect-device", methods=['POST'])
 def connect_device():
     data = request.get_json()
-    device_code = data.get('device_code')
-    
-    print(f"Connecting device with code: {device_code}")  # Debug log
+    if not data or 'device_code' not in data:
+        return jsonify({
+            "status": "error",
+            "message": "Missing device code"
+        }), 400
+
+    device_code = data['device_code']
+    print(f"Attempting to connect device with code: {device_code}")
     
     conn = sqlite3.connect('unilocator.db')
     cursor = conn.cursor()
     
     try:
-        # Check if device exists in pending_devices
-        cursor.execute("SELECT user_id FROM pending_devices WHERE device_code = ?", (device_code,))
+        # First check if device exists in pending_devices
+        cursor.execute("""
+            SELECT user_id FROM pending_devices 
+            WHERE device_code = ? 
+        """, (device_code,))
         pending_device = cursor.fetchone()
         
         if not pending_device:
-            print(f"No pending device found with code: {device_code}")
-            return jsonify({"status": "error", "message": "Invalid device code"}), 404
+            return jsonify({
+                "status": "error",
+                "message": "Invalid or expired device code"
+            }), 404
             
         user_id = pending_device[0]
-        print(f"Found pending device for user: {user_id}")
         
-        # Check if device is already connected
-        cursor.execute("SELECT id FROM connected_devices WHERE device_code = ?", (device_code,))
-        existing_device = cursor.fetchone()
+        # Check if already connected
+        cursor.execute("""
+            SELECT id FROM connected_devices 
+            WHERE device_code = ?
+        """, (device_code,))
         
-        if existing_device:
-            print(f"Device {device_code} already connected")
-            return jsonify({"status": "success", "message": "Device already connected"})
+        if cursor.fetchone():
+            return jsonify({
+                "status": "success",
+                "message": "Device already connected"
+            })
         
-        # Add to connected devices
+        # Add to connected_devices
+        device_name = f"Device_{device_code[:6]}"
         cursor.execute("""
             INSERT INTO connected_devices (user_id, device_code, device_name)
             VALUES (?, ?, ?)
-        """, (user_id, device_code, f"Device_{device_code[:6]}"))
+        """, (user_id, device_code, device_name))
         
-        # Remove from pending devices
+        # Remove from pending_devices
         cursor.execute("DELETE FROM pending_devices WHERE device_code = ?", (device_code,))
         
         conn.commit()
-        print(f"Device {device_code} connected successfully")
+        print(f"Successfully connected device: {device_code}")
         
-        return jsonify({"status": "success", "message": "Device connected successfully"})
+        return jsonify({
+            "status": "success",
+            "message": "Device connected successfully",
+            "device_name": device_name
+        })
         
     except Exception as e:
         print(f"Error connecting device: {e}")
         conn.rollback()
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({
+            "status": "error",
+            "message": f"Connection failed: {str(e)}"
+        }), 500
     finally:
         conn.close()
 

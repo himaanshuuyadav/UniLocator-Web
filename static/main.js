@@ -155,5 +155,53 @@ document.addEventListener('DOMContentLoaded', function() {
         if (codeContainer) codeContainer.textContent = '';
     }
 
+    function connectDevice(deviceCode) {
+        fetch('/connect-device', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ device_code: deviceCode })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Device connected successfully:', data.message);
+                // Show success message to user
+                alert('Device connected successfully!');
+                // Optionally reload the page to show the new device
+                window.location.reload();
+            } else {
+                console.error('Connection failed:', data.message);
+                alert('Failed to connect device: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Connection error:', error);
+            alert('Error connecting device. Please try again.');
+        });
+    }
+
+    // Profile dropdown functionality
+    const profileDropdown = document.querySelector('.profile-dropdown');
+    if (profileDropdown) {
+        profileDropdown.addEventListener('click', (e) => {
+            const dropdownContent = profileDropdown.querySelector('.dropdown-content');
+            if (dropdownContent) {
+                dropdownContent.classList.toggle('show');
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!profileDropdown.contains(e.target)) {
+                const dropdownContent = profileDropdown.querySelector('.dropdown-content');
+                if (dropdownContent && dropdownContent.classList.contains('show')) {
+                    dropdownContent.classList.remove('show');
+                }
+            }
+        });
+    }
+
     console.log('Main script initialized');
 });
