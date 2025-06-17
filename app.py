@@ -10,9 +10,13 @@ import random
 import string
 import json
 from io import BytesIO  # Add this import
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'
+
+# Initialize SocketIO
+socketio = SocketIO(app)
 
 def init_db():
     conn = sqlite3.connect('unilocator.db')
@@ -64,66 +68,44 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
-        
         conn = sqlite3.connect('unilocator.db')
         cursor = conn.cursor()
-        
-        try:
-            cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
-            user = cursor.fetchone()
-            
-            if user and check_password_hash(user[3], password):
-                session['user_id'] = user[0]
-                session['user_name'] = user[1]
-                return redirect(url_for('index'))
-            else:
-                flash("Invalid email or password", "error")
-        except Exception as e:
-            flash(f"An error occurred: {str(e)}", "error")
-        finally:
-            conn.close()
-            
-        return redirect(url_for('login'))
-        
-    return render_template('login.html')
+        cursor.execute("SELECT id, name, password FROM users WHERE email = ?", (email,))
+        user = cursor.fetchone()
+        conn.close()
+        if user and check_password_hash(user[2], password):
+            session.clear()
+            session['user_id'] = user[0]
+            session['user_name'] = user[1]
+            return redirect(url_for('home'))
+        else:
+            flash("Invalid email or password", "error")
+            return render_template("login.html")
+    return render_template("login.html")
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
-    if 'user_id' in session:
-        return redirect(url_for('index'))
-    
     if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
         password = request.form.get('password')
-        
-        if not all([name, email, password]):
-            flash("All fields are required", "error")
-            return redirect(url_for('register'))
-            
+        hashed_password = generate_password_hash(password)
         conn = sqlite3.connect('unilocator.db')
         cursor = conn.cursor()
-        
         try:
-            cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
-            if cursor.fetchone():
-                flash("Email already registered", "error")
-                return redirect(url_for('register'))
-            
-            hashed_password = generate_password_hash(password)
-            cursor.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
-                         (name, email, hashed_password))
+            cursor.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", (name, email, hashed_password))
             conn.commit()
-            flash("Registration successful! Please log in.", "success")
-            return redirect(url_for('login'))
-            
-        except Exception as e:
-            flash(f"An error occurred: {str(e)}", "error")
-            return redirect(url_for('register'))
+            user_id = cursor.lastrowid
+            session.clear()
+            session['user_id'] = user_id
+            session['user_name'] = name
+            return redirect(url_for('home'))
+        except sqlite3.IntegrityError:
+            flash("Email already registered", "error")
+            return render_template("register.html")
         finally:
             conn.close()
-            
-    return render_template('register.html')  # Changed from auth.html to register.html
+    return render_template("register.html")  # Changed from auth.html to register.html
 # Store locations for multiple devices
 device_locations = {}  # e.g., {"galaxy_a03": {"lat": ..., "lng": ...}, ...}
 device_history = {}    # Optional: {"galaxy_a03": [loc1, loc2, ...], ...}
@@ -185,8 +167,9 @@ def home():
     return render_template("dashboard.html")
 
 @app.route("/device/<device_id>")
-def show_device_map(device_id):
-    return render_template("map.html", device_id=device_id)
+def device_details(device_id):
+    # Your device details code here
+    return render_template("device.html", device_id=device_id)
 
 @app.route("/location/<device_id>", methods=["POST"])
 def update_location(device_id):
@@ -222,17 +205,12 @@ def get_history(device_id):
 @app.route("/map/<device_id>")
 def show_map(device_id):
     return render_template("map.html", device_id=device_id)
-@app.route("/")
-def home():
-    if 'user_id' in session:
-        return redirect(url_for('index'))
-    return render_template("Dashboard.html")  # Changed from index.html to Dashboard.html
 
 # Add a logout route
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for('home'))
+    return redirect(url_for('login'))
 
 @app.route("/add-device", methods=['GET', 'POST'])
 @login_required
@@ -299,19 +277,14 @@ def add_device():
 def connect_device():
     data = request.get_json()
     if not data or 'device_code' not in data:
-        return jsonify({
-            "status": "error",
-            "message": "Missing device code"
-        }), 400
+        return jsonify({"status": "error", "message": "Missing device code"}), 400
 
     device_code = data['device_code']
-    print(f"Attempting to connect device with code: {device_code}")
-    
     conn = sqlite3.connect('unilocator.db')
     cursor = conn.cursor()
     
     try:
-        # First check if device exists in pending_devices
+        # Check if device exists in pending_devices
         cursor.execute("""
             SELECT user_id FROM pending_devices 
             WHERE device_code = ? 
@@ -319,27 +292,12 @@ def connect_device():
         pending_device = cursor.fetchone()
         
         if not pending_device:
-            return jsonify({
-                "status": "error",
-                "message": "Invalid or expired device code"
-            }), 404
+            return jsonify({"status": "error", "message": "Invalid code"}), 404
             
         user_id = pending_device[0]
-        
-        # Check if already connected
-        cursor.execute("""
-            SELECT id FROM connected_devices 
-            WHERE device_code = ?
-        """, (device_code,))
-        
-        if cursor.fetchone():
-            return jsonify({
-                "status": "success",
-                "message": "Device already connected"
-            })
+        device_name = f"Device_{device_code[:6]}"
         
         # Add to connected_devices
-        device_name = f"Device_{device_code[:6]}"
         cursor.execute("""
             INSERT INTO connected_devices (user_id, device_code, device_name)
             VALUES (?, ?, ?)
@@ -347,9 +305,14 @@ def connect_device():
         
         # Remove from pending_devices
         cursor.execute("DELETE FROM pending_devices WHERE device_code = ?", (device_code,))
-        
         conn.commit()
-        print(f"Successfully connected device: {device_code}")
+
+        # Emit socket event for real-time update
+        socketio.emit('device_connected', {
+            'device_code': device_code,
+            'device_name': device_name,
+            'user_id': user_id
+        }, room=str(user_id))
         
         return jsonify({
             "status": "success",
@@ -360,10 +323,7 @@ def connect_device():
     except Exception as e:
         print(f"Error connecting device: {e}")
         conn.rollback()
-        return jsonify({
-            "status": "error",
-            "message": f"Connection failed: {str(e)}"
-        }), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
     finally:
         conn.close()
 

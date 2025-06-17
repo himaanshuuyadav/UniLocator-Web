@@ -203,5 +203,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Initialize Socket.IO
+    const socket = io();
+
+    socket.on('connect', () => {
+        console.log('Connected to WebSocket server');
+    });
+
+    socket.on('device_connected', (data) => {
+        console.log('New device connected:', data);
+        // Reload the devices list
+        location.reload();
+    });
+
+    function addDeviceToList(device) {
+        const devicesGrid = document.querySelector('.devices-grid');
+        if (!devicesGrid) return;
+
+        const deviceCard = document.createElement('div');
+        deviceCard.className = 'device-card';
+        deviceCard.innerHTML = `
+            <div class="device-header">
+                <h3>${device.name}</h3>
+                <span class="device-status">Connected</span>
+            </div>
+            <div class="device-info">
+                <p><i class="fas fa-qrcode"></i> ID: ${device.code}</p>
+                <p><i class="fas fa-clock"></i> Connected: Just now</p>
+                <p><i class="fas fa-map-marker-alt"></i> Waiting for location...</p>
+            </div>
+        `;
+        devicesGrid.appendChild(deviceCard);
+    }
+
     console.log('Main script initialized');
 });
