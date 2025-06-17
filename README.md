@@ -1,6 +1,6 @@
 # UniLocator 📍
 
-![UniLocator Dashboard](static/images/galaxy_a03.png)**UniLocator** is an advanced web application for real-time device tracking and management. Built primarily with **Python** and **Flask**, it offers a seamless experience for monitoring device locations, managing connections, and accessing location history through a modern, responsive interface. Whether for personal use or fleet management, UniLocator combines cutting-edge technology with an intuitive design to keep you connected to your devices.
+**UniLocator** is an advanced web application for real-time device tracking and management. Built primarily with **Python** and **Flask**, it offers a seamless experience for monitoring device locations, managing connections, and accessing location history through a modern, responsive interface. Whether for personal use or fleet management, UniLocator combines cutting-edge technology with an intuitive design to keep you connected to your devices.
 
 ## 🚀 Features
 
