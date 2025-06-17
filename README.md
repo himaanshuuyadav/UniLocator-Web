@@ -1,137 +1,114 @@
-UniLocator 📍
-UniLocator is an advanced web application for real-time device tracking and management. Built primarily with Python and Flask, it offers a seamless experience for monitoring device locations, managing connections, and accessing location history through a modern, responsive interface. Whether for personal use or fleet management, UniLocator combines cutting-edge technology with an intuitive design to keep you connected to your devices.
-🚀 Features
+# UniLocator 📍
 
-Real-Time Tracking: Monitor device locations with precise latitude and longitude updates on an interactive map powered by Leaflet.
-Device Management: Add devices via QR codes or unique codes, view connected devices, and track their status.
-Location History: Access and analyze historical device movements.
-Secure Authentication: Robust user registration and login system with password hashing using Werkzeug.
-Real-Time Updates: Instant notifications for device connections and location changes via Socket.IO WebSockets.
-QR Code Integration: Generate and scan QR codes for quick device pairing.
-Responsive Design: Sleek, mobile-friendly UI with particle animations (particles.js) and smooth scrolling.
-Database Management: SQLite database with tables for users, pending devices, and connected devices, ensuring efficient data handling.
-Cross-Platform Support: Web-based interface accessible on desktops, tablets, and smartphones.
+![UniLocator Dashboard](static/images/galaxy_a03.png)**UniLocator** is an advanced web application for real-time device tracking and management. Built primarily with **Python** and **Flask**, it offers a seamless experience for monitoring device locations, managing connections, and accessing location history through a modern, responsive interface. Whether for personal use or fleet management, UniLocator combines cutting-edge technology with an intuitive design to keep you connected to your devices.
 
-🛠️ Tech Stack
+## 🚀 Features
 
+- **Real-Time Tracking**: Monitor device locations with precise latitude and longitude updates on an interactive map powered by Leaflet.
+- **Device Management**: Add devices via QR codes or unique codes, view connected devices, and track their status.
+- **Location History**: Access and analyze historical device movements.
+- **Secure Authentication**: Robust user registration and login system with password hashing using Werkzeug.
+- **Real-Time Updates**: Instant notifications for device connections and location changes via Socket.IO WebSockets.
+- **QR Code Integration**: Generate and scan QR codes for quick device pairing.
+- **Responsive Design**: Sleek, mobile-friendly UI with particle animations (particles.js) and smooth scrolling.
+- **Database Management**: SQLite database with tables for users, pending devices, and connected devices, ensuring efficient data handling.
+- **Cross-Platform Support**: Web-based interface accessible on desktops, tablets, and smartphones.
 
+## 🛠️ Tech Stack
 
-Component
-Technology
-Purpose
+| Component | Technology | Purpose |
+| --- | --- | --- |
+| **Backend** | Python (Primary Language), Flask, Flask-SocketIO, SQLite | Server-side logic, API, real-time communication, database |
+| **Frontend** | HTML, CSS, JavaScript, Leaflet, particles.js | User interface, interactive maps, animations |
+| **Libraries** | qrcode, Werkzeug, gevent, Pillow | QR code generation, password hashing, WebSocket support, image processing |
+| **Styling** | Custom CSS, Font Awesome | Modern UI design, icons |
+| **Deployment** | Configured for `0.0.0.0:5000` | Development server |
 
+**Primary Language**: Python (\~70% of codebase), with JavaScript (\~20%) and HTML/CSS (\~10%) for frontend.
 
+## 📸 Screenshots
 
-Backend
-Python (Primary Language), Flask, Flask-SocketIO, SQLite
-Server-side logic, API, real-time communication, database
+| Dashboard | Add Device Modal | Live Map |
+| --- | --- | --- |
+|  |  |  |
 
+*Note: Replace placeholder screenshot paths with actual images for best results.*
 
-Frontend
-HTML, CSS, JavaScript, Leaflet, particles.js
-User interface, interactive maps, animations
+## 📦 Installation
 
+### Prerequisites
 
-Libraries
-qrcode, Werkzeug, gevent, Pillow
-QR code generation, password hashing, WebSocket support, image processing
+- Python 3.8 or higher
+- pip (Python package manager)
+- Git
+- Node.js (optional, for frontend development)
 
+### Steps
 
-Styling
-Custom CSS, Font Awesome
-Modern UI design, icons
+1. **Clone the Repository**
 
+   ```bash
+   git clone https://github.com/himaanshuuyadav/Unilocator.git
+   cd Unilocator
+   ```
 
-Deployment
-Configured for 0.0.0.0:5000
-Development server
+2. **Set Up a Virtual Environment**
 
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-Primary Language: Python (~70% of codebase), with JavaScript (~20%) and HTML/CSS (~10%) for frontend.
-📸 Screenshots
+3. **Install Dependencies**
 
+   ```bash
+   pip install flask flask-socketio gevent werkzeug qrcode pillow
+   ```
 
+4. **Initialize the Database**Create the SQLite database and tables:
 
-Dashboard
-Add Device Modal
-Live Map
+   ```bash
+   python init_db.py
+   ```
 
+5. **Run the Application**Start the Flask development server:
 
+   ```bash
+   python app.py
+   ```
 
+   Access the app at `http://localhost:5000`.
 
+## 📖 Usage
 
+1. **Create an Account**
 
+   - Visit `http://localhost:5000/register`.
+   - Provide your name, email, and password to sign up.
 
+2. **Log In**
 
-Note: Replace placeholder screenshot paths with actual images for best results.
-📦 Installation
-Prerequisites
+   - Navigate to `http://localhost:5000/login` and enter your credentials.
 
-Python 3.8 or higher
-pip (Python package manager)
-Git
-Node.js (optional, for frontend development)
+3. **Add a Device**
 
-Steps
+   - From the dashboard (`http://localhost:5000`), click "Add New Device".
+   - Follow the modal steps to download the UniLocator app (placeholder links).
+   - Choose a connection method (QR code or unique code) and scan/enter the code in the app.
 
-Clone the Repository
-git clone https://github.com/himaanshuuyadav/Unilocator.git
-cd Unilocator
+4. **Track Devices**
 
+   - View all connected devices on the dashboard.
+   - Click a device to access its details or view its live location on the map (`/map/<device_id>`).
+   - Location updates refresh every 5 seconds.
 
-Set Up a Virtual Environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+5. **Debug Database**
 
+   - Run `python db_checker.py` to view database schema and row counts for troubleshooting.
 
-Install Dependencies
-pip install flask flask-socketio gevent werkzeug qrcode pillow
+## 📁 Project Structure
 
-
-Initialize the DatabaseCreate the SQLite database and tables:
-python init_db.py
-
-
-Run the ApplicationStart the Flask development server:
-python app.py
-
-Access the app at http://localhost:5000.
-
-
-📖 Usage
-
-Create an Account
-
-Visit http://localhost:5000/register.
-Provide your name, email, and password to sign up.
-
-
-Log In
-
-Navigate to http://localhost:5000/login and enter your credentials.
-
-
-Add a Device
-
-From the dashboard (http://localhost:5000), click "Add New Device".
-Follow the modal steps to download the UniLocator app (placeholder links).
-Choose a connection method (QR code or unique code) and scan/enter the code in the app.
-
-
-Track Devices
-
-View all connected devices on the dashboard.
-Click a device to access its details or view its live location on the map (/map/<device_id>).
-Location updates refresh every 5 seconds.
-
-
-Debug Database
-
-Run python db_checker.py to view database schema and row counts for troubleshooting.
-
-
-
-📁 Project Structure
+```
 Unilocator/
 ├── __pycache__/            # Compiled Python files
 │   └── app.cpython-313.pyc
@@ -161,30 +138,42 @@ Unilocator/
 │   └── register.html      # Registration page
 ├── unilocator.db           # SQLite database
 └── update_schema.sql       # SQL schema updates
+```
 
-🌟 Why UniLocator?
+## 🌟 Why UniLocator?
 
-Developer-Friendly: Well-documented Python codebase with modular design.
-User-Centric: Intuitive interface with real-time feedback.
-Scalable: Flask and SQLite provide a solid foundation for future enhancements.
-Open Source: Free to use and modify under the MIT License.
+- **Developer-Friendly**: Well-documented Python codebase with modular design.
+- **User-Centric**: Intuitive interface with real-time feedback.
+- **Scalable**: Flask and SQLite provide a solid foundation for future enhancements.
+- **Open Source**: Free to use and modify under the MIT License.
 
-🤝 Contributing
+## 🤝 Contributing
+
 We welcome contributions to make UniLocator even better! To contribute:
 
-Fork the repository.
-Create a feature branch (git checkout -b feature/awesome-feature).
-Commit your changes (git commit -m 'Add awesome feature').
-Push to the branch (git push origin feature/awesome-feature).
-Open a pull request.
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/awesome-feature`).
+3. Commit your changes (`git commit -m 'Add awesome feature'`).
+4. Push to the branch (`git push origin feature/awesome-feature`).
+5. Open a pull request.
 
 Please follow PEP 8 for Python code and include clear documentation.
-🐛 Issues & Support
-Found a bug or have a feature request? Open an issue with details, and we’ll address it promptly.
-📜 License
-This project is licensed under the MIT License. Feel free to use, modify, and distribute as needed.
-👨‍💻 Author
-Developed by Himaanshu Yadav.Connect with me on LinkedIn or open an issue for feedback!
 
-⭐ Star this repository if you find UniLocator useful!\
-Happy tracking! 🚀
+## 🐛 Issues & Support
+
+Found a bug or have a feature request? Open an issue with details, and we’ll address it promptly.
+
+## 📜 License
+
+This project is licensed under the MIT License. Feel free to use, modify, and distribute as needed.
+
+## 👨‍💻 Author
+
+Developed by Himaanshu Yadav.\
+Connect with me on LinkedIn or open an issue for feedback!
+
+---
+
+# ⭐ **Star this repository** if you find UniLocator useful!\\
+
+### Happy tracking! 🚀
