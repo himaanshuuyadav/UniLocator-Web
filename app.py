@@ -1,22 +1,26 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash
-import sqlite3
-from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-import secrets
+from gevent import monkey
+monkey.patch_all()
+
+from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash
+from werkzeug.security import generate_password_hash, check_password_hash
+import sqlite3
 import qrcode
 import io
 import base64
 import random
 import string
 import json
-from io import BytesIO  # Add this import
-from flask_socketio import SocketIO, emit
+from io import BytesIO
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'
 
-# Initialize SocketIO
-socketio = SocketIO(app)
+# Configure SocketIO with WebSocket support
+socketio = SocketIO(app,
+                   async_mode='gevent',
+                   cors_allowed_origins="*")
 
 def init_db():
     conn = sqlite3.connect('unilocator.db')
@@ -280,6 +284,8 @@ def connect_device():
         return jsonify({"status": "error", "message": "Missing device code"}), 400
 
     device_code = data['device_code']
+    print(f"Attempting to connect device: {device_code}")  # Debug log
+    
     conn = sqlite3.connect('unilocator.db')
     cursor = conn.cursor()
     
@@ -292,6 +298,7 @@ def connect_device():
         pending_device = cursor.fetchone()
         
         if not pending_device:
+            print(f"No pending device found for code: {device_code}")  # Debug log
             return jsonify({"status": "error", "message": "Invalid code"}), 404
             
         user_id = pending_device[0]
@@ -306,13 +313,15 @@ def connect_device():
         # Remove from pending_devices
         cursor.execute("DELETE FROM pending_devices WHERE device_code = ?", (device_code,))
         conn.commit()
+        
+        print(f"Device {device_code} connected successfully")  # Debug log
 
         # Emit socket event for real-time update
         socketio.emit('device_connected', {
             'device_code': device_code,
             'device_name': device_name,
             'user_id': user_id
-        }, room=str(user_id))
+        })
         
         return jsonify({
             "status": "success",
@@ -321,7 +330,7 @@ def connect_device():
         })
         
     except Exception as e:
-        print(f"Error connecting device: {e}")
+        print(f"Error connecting device: {e}")  # Debug log
         conn.rollback()
         return jsonify({"status": "error", "message": str(e)}), 500
     finally:
@@ -375,21 +384,8 @@ def generate_device_code():
         'qr_code': f'data:image/png;base64,{img_str}'
     })
     
-if __name__ == "__main__":
+if __name__ == '__main__':
     # Initialize database
     init_db()
-    
-    # Create test user if not exists
-    conn = sqlite3.connect('unilocator.db')
-    cursor = conn.cursor()
-    
-    try:
-        cursor.execute("""
-            INSERT OR IGNORE INTO users (name, email, password)
-            VALUES (?, ?, ?)
-        """, ('Test User', 'test@example.com', generate_password_hash('password123')))
-        conn.commit()
-    finally:
-        conn.close()
-    
+    # Run the app with basic configuration
     app.run(host='0.0.0.0', port=5000, debug=True)
