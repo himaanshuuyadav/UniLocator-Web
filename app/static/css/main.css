@@ -465,13 +465,10 @@ main {
 }
 
 .qr-container {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-    padding: 20px;
-    background: white;
-    border-radius: 8px;
     text-align: center;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 8px;
 }
 
 .qr-code {
@@ -480,25 +477,6 @@ main {
     border-radius: 8px;
     max-width: 200px;
     margin: 0 auto;
-}
-
-.qr-container img {
-    max-width: 200px;
-    height: auto;
-}
-
-.code-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    font-size: 24px;
-    text-align: center;
-    padding: 20px;
-    margin: 20px 0;
-    background: var(--bg-light);
-    border-radius: 8px;
-    letter-spacing: 2px;
 }
 
 .code-container {
@@ -517,22 +495,10 @@ main {
     letter-spacing: 2px;
 }
 
-.code-text {
-    font-family: monospace;
-    font-size: 28px;
-}
-
-.copy-btn {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    padding: 5px;
-    transition: color 0.2s;
-}
-
-.copy-btn:hover {
-    color: var(--accent);
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: #888;
 }
 
 .error-message {

@@ -26,45 +26,54 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function generateUniqueCode(method) {
+        console.log('Generating code for method:', method); // Debug log
+
+        // Show loading state
+        document.getElementById('step3Content').innerHTML = '<div class="loading">Generating code...</div>';
+
         fetch('/devices/generate-code', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             },
-            credentials: 'same-origin'  // Important for session cookies
+            credentials: 'same-origin'
         })
         .then(response => {
+            console.log('Response status:', response.status); // Debug log
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
+            console.log('Received data:', data); // Debug log
+
             if (data.success) {
+                const step3Content = document.getElementById('step3Content');
                 if (method === 'qr') {
-                    // Show QR code
-                    document.getElementById('step3Content').innerHTML = `
+                    step3Content.innerHTML = `
                         <div class="qr-container">
                             <img src="${data.qr_code}" alt="QR Code" class="qr-code">
-                            <p>Scan this QR code using the UniLocator app</p>
+                            <p class="mt-3">Scan this QR code using the UniLocator app</p>
                         </div>`;
                 } else {
-                    // Show manual code
-                    document.getElementById('step3Content').innerHTML = `
+                    step3Content.innerHTML = `
                         <div class="code-container">
                             <div class="connection-code">${data.code}</div>
-                            <p>Enter this code in your UniLocator app</p>
+                            <p class="mt-3">Enter this code in your UniLocator app</p>
                         </div>`;
                 }
             } else {
-                console.error('Error:', data.error);
+                throw new Error(data.error || 'Failed to generate code');
             }
         })
         .catch(error => {
             console.error('Error:', error);
             document.getElementById('step3Content').innerHTML = `
                 <div class="error-message">
-                    Error generating code. Please try again.
+                    <p>Error generating code. Please try again.</p>
+                    <small>${error.message}</small>
                 </div>`;
         });
     }
