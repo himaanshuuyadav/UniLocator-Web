@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - UniLocator</title>
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <div class="nav-brand">UniLocator</div>
+        <div class="nav-links">
+            {% if session.user_id %}
+                <a href="{{ url_for('main.index') }}">Home</a>
+                <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+            {% endif %}
+            {% if not session.get('user_id') %}
+                <a href="{{ url_for('auth.login') }}">Login</a>
+                <a href="{{ url_for('auth.register') }}">Register</a>
+            {% else %}
+                <a href="{{ url_for('auth.logout') }}">Logout</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <main>
+        {% for message in get_flashed_messages() %}
+            <div class="flash">{{ message }}</div>
+        {% endfor %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Core JavaScript -->
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- Page specific JavaScript -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>

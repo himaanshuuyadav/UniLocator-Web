@@ -203,26 +203,56 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Initialize Socket.IO with options
+    // Initialize Socket.IO with proper configuration
     const socket = io({
-        transports: ['websocket', 'polling'],
-        reconnection: true,
+        transports: ['polling', 'websocket'],
         reconnectionAttempts: 5,
         reconnectionDelay: 1000
     });
 
+    // Connection event handlers
     socket.on('connect', () => {
-        console.log('WebSocket connected successfully');
+        console.log('Successfully connected to server');
+        document.dispatchEvent(new CustomEvent('socketConnected'));
+    });
+
+    socket.on('server_status', (data) => {
+        console.log('Server status:', data);
+    });
+
+    socket.on('device_connected', (data) => {
+        console.log('New device connected:', data);
+        addDeviceToUI(data);
     });
 
     socket.on('connect_error', (error) => {
         console.error('Connection error:', error);
     });
 
-    socket.on('device_connected', (data) => {
-        console.log('New device connected:', data);
-        // Reload the page to show new device
-        window.location.reload();
+    function addDeviceToUI(device) {
+        const devicesGrid = document.querySelector('.devices-grid');
+        if (!devicesGrid) return;
+
+        const deviceCard = document.createElement('div');
+        deviceCard.className = 'device-card';
+        deviceCard.dataset.deviceId = device.id;
+        deviceCard.innerHTML = `
+            <div class="device-header">
+                <h3>${device.device_name}</h3>
+                <span class="device-status">Connected</span>
+            </div>
+            <div class="device-info">
+                <p><i class="fas fa-qrcode"></i> ID: ${device.device_code}</p>
+                <p><i class="fas fa-clock"></i> Added: Just now</p>
+            </div>
+        `;
+        devicesGrid.appendChild(deviceCard);
+    }
+
+    // Listen for new devices
+    socket.on('device_added', function(device) {
+        console.log('New device added:', device);
+        addDeviceToUI(device);
     });
 
     console.log('Main script initialized');

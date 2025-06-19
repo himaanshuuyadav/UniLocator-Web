@@ -77,6 +77,47 @@ document.addEventListener('DOMContentLoaded', function() {
         showStep(1);
     }
 
+    function handleFinishStep() {
+        fetch('/devices/add', {  // Updated endpoint
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                device_code: document.getElementById('device-code').value,
+                device_name: document.getElementById('device-name').value
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Device added successfully:', data.device);
+                // Close the modal
+                const modal = document.querySelector('.modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+                // Reset the form
+                document.getElementById('add-device-form').reset();
+                // Refresh the devices list
+                window.location.reload();
+            } else {
+                console.error('Error adding device:', data.error);
+                alert('Error adding device: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error adding device. Please try again.');
+        });
+    }
+
+    // Update the finish button event listener
+    const finishButton = document.querySelector('.finish-btn');
+    if (finishButton) {
+        finishButton.addEventListener('click', handleFinishStep);
+    }
+    
     // For debugging
     console.log('Add device script initialized');
 });

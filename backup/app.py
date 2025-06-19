@@ -1,26 +1,88 @@
 from functools import wraps
-from gevent import monkey
-monkey.patch_all()
-
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash
+from flask_socketio import SocketIO
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
-import qrcode
-import io
-import base64
-import random
-import string
-import json
-from io import BytesIO
-from flask_socketio import SocketIO
+import logging
+import sys
 
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    stream=sys.stdout
+)
+logger = logging.getLogger(__name__)
+
+# Initialize Flask app
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'
 
-# Configure SocketIO with WebSocket support
-socketio = SocketIO(app,
-                   async_mode='gevent',
-                   cors_allowed_origins="*")
+# Configure SocketIO
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    logger=True,
+    engineio_logger=True
+)
+
+# Device routes
+def add_device_handler():
+    """Handle device addition logic"""
+    if request.method == 'POST':
+        if not request.is_json:
+            return jsonify({'error': 'Content-Type must be application/json'}), 400
+            
+        data = request.get_json()
+        device_code = data.get('device_code')
+        device_name = data.get('device_name')
+        user_id = session.get('user_id')
+
+        logger.debug(f"Adding device: {device_name} ({device_code}) for user {user_id}")
+
+        if not all([device_code, device_name, user_id]):
+            return jsonify({'error': 'Missing required data'}), 400
+
+        try:
+            with sqlite3.connect('unilocator.db') as conn:
+                cursor = conn.cursor()
+                cursor.execute('SELECT id FROM devices WHERE device_code = ?', (device_code,))
+                if cursor.fetchone():
+                    return jsonify({'error': 'Device already exists'}), 409
+
+                cursor.execute('''
+                    INSERT INTO devices (device_code, device_name, user_id)
+                    VALUES (?, ?, ?)
+                ''', (device_code, device_name, user_id))
+                
+                device_id = cursor.lastrowid
+                conn.commit()
+                
+                device_data = {
+                    'id': device_id,
+                    'device_code': device_code,
+                    'device_name': device_name
+                }
+                
+                socketio.emit('device_added', device_data)
+                return jsonify({'success': True, 'device': device_data}), 201
+
+        except Exception as e:
+            logger.error(f"Database error: {e}")
+            return jsonify({'error': str(e)}), 500
+    
+    return jsonify({'error': 'Method not allowed'}), 405
+
+# Remove existing route if present
+if 'add_device' in app.view_functions:
+    del app.view_functions['add_device']
+
+# Register route
+app.add_url_rule('/add-device', 'add_device', add_device_handler, methods=['POST'])
+
+@app.route('/test')
+def test():
+    return jsonify({'status': 'Server is running!'})
 
 def init_db():
     conn = sqlite3.connect('unilocator.db')
@@ -383,9 +445,21 @@ def generate_device_code():
         'unique_code': code,
         'qr_code': f'data:image/png;base64,{img_str}'
     })
-    
+
 if __name__ == '__main__':
-    # Initialize database
-    init_db()
-    # Run the app with basic configuration
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    try:
+        logger.info("Starting application initialization...")
+        init_db()
+        
+        print("\nServer starting at http://127.0.0.1:5000")
+        
+        socketio.run(
+            app,
+            host='127.0.0.1',
+            port=5000,
+            debug=True,
+            use_reloader=False
+        )
+    except Exception as e:
+        logger.error(f"Failed to start server: {e}", exc_info=True)
+        sys.exit(1)

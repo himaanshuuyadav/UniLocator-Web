@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UniLocator - Track Your Devices</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="/static/Dashboard.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
 <body>
     <nav>
         <div class="logo">UniLocator</div>
         <div class="nav-buttons">
-            <a href="{{ url_for('login') }}" class="btn btn-login">Log in</a>
-            <a href="{{ url_for('register') }}" class="btn btn-signup">Sign up</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-login">Log in</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-signup">Sign up</a>
         </div>
     </nav>
 
@@ -25,7 +25,7 @@
                 Seamlessly monitor and locate your devices in real-time with our powerful tracking solution.
                 Built with advanced technology for reliable device management.
             </p>
-            <a href="{{ url_for('register') }}" class="btn btn-cta">Get Started for free →</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-cta">Get Started for free →</a>
         </div>
 
         <div class="features">
@@ -48,7 +48,8 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script src="/static/particles-config.js"></script>
-    <script src="/static/smooth-scroll.js"></script>
+    <script src="{{ url_for('static', filename='js/particles-config.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/add_device.js') }}"></script>
 </body>
 </html>

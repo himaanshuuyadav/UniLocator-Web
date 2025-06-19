@@ -2,22 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login - UniLocator</title>
-    <link rel="stylesheet" href="/static/auth.css">
+    <title>Register - UniLocator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
     <div id="particles-js"></div>
     <div class="container">
         <div class="form-container">
-            <form id="loginForm" class="form" method="POST" action="{{ url_for('login') }}">
-                <input type="hidden" name="form_type" value="login">
+            <form id="registerForm" class="form" method="POST" action="{{ url_for('auth.register') }}">
                 <div class="box-head">
-                    <h2>Log in to UniLocator</h2>
-                    <p class="head_text">Enter your credentials to access your account</p>
+                    <h2>Create Account</h2>
+                    <p class="head_text">Join UniLocator to track your devices</p>
                 </div>
                 <hr>
                 <div class="input-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" placeholder="Full Name" name="username" required>
+                    </div>
+
                     <div class="input-wrapper">
                         <i class="fas fa-envelope"></i>
                         <input type="email" placeholder="Email" name="email" required>
@@ -30,15 +34,15 @@
                     </div>
                 </div>
 
-                <button type="submit">Login</button>
+                <button type="submit">Create Account</button>
                 <hr>
-                <p class="already">Don't have an account? <a href="{{ url_for('register') }}">Sign up</a></p>
+                <p class="already">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
             </form>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script src="/static/particles-config.js"></script>
-    <script src="/static/auth.js"></script>
+    <script src="{{ url_for('static', filename='js/particles-config.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 </body>
 </html>
