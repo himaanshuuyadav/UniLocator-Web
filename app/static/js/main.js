@@ -25,39 +25,48 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    function generateUniqueCode() {
-        fetch('/generate-device-code', {
+    function generateUniqueCode(method) {
+        fetch('/devices/generate-code', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            credentials: 'same-origin'  // Important for session cookies
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
-            uniqueCode = data.unique_code;
-            
-            // Update QR code
-            const qrContainer = document.getElementById('qrCode');
-            if (qrContainer) {
-                const qrImage = document.createElement('img');
-                qrImage.src = data.qr_code;
-                qrImage.alt = 'QR Code';
-                qrContainer.innerHTML = '';
-                qrContainer.appendChild(qrImage);
-            }
-
-            // Update unique code display
-            const codeContainer = document.getElementById('connectionCode');
-            if (codeContainer) {
-                codeContainer.innerHTML = `
-                    <span class="code-text">${uniqueCode}</span>
-                    <button class="copy-btn" onclick="navigator.clipboard.writeText('${uniqueCode}')">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                `;
+            if (data.success) {
+                if (method === 'qr') {
+                    // Show QR code
+                    document.getElementById('step3Content').innerHTML = `
+                        <div class="qr-container">
+                            <img src="${data.qr_code}" alt="QR Code" class="qr-code">
+                            <p>Scan this QR code using the UniLocator app</p>
+                        </div>`;
+                } else {
+                    // Show manual code
+                    document.getElementById('step3Content').innerHTML = `
+                        <div class="code-container">
+                            <div class="connection-code">${data.code}</div>
+                            <p>Enter this code in your UniLocator app</p>
+                        </div>`;
+                }
+            } else {
+                console.error('Error:', data.error);
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('step3Content').innerHTML = `
+                <div class="error-message">
+                    Error generating code. Please try again.
+                </div>`;
+        });
     }
 
     // Method selection handlers
@@ -79,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Generate code when method is selected
-            generateUniqueCode();
+            generateUniqueCode(method);
             currentStep = 2;
             showStep(currentStep);
         });

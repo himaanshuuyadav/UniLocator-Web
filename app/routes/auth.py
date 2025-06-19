@@ -85,7 +85,8 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
-            return redirect(url_for('main.index'))
+            # Redirect to index.html instead of dashboard
+            return redirect(url_for('main.home'))
 
         flash(error)
 

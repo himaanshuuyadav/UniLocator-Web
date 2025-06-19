@@ -14,7 +14,7 @@ def create_app():
     # Register blueprints
     from .routes import auth, devices, main
     app.register_blueprint(auth.bp)
-    app.register_blueprint(devices.bp)
+    app.register_blueprint(devices.bp, url_prefix='/devices')  # Add this line
     app.register_blueprint(main.bp)
     
     return app

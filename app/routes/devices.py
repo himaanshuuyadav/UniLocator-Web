@@ -1,63 +1,54 @@
-
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify, session
 from flask_socketio import emit
+from functools import wraps
 from ..utils.database import get_db
-from .auth import login_required
 import logging
+import secrets
+import string
+import qrcode
+import io
+import base64
 
-logger = logging.getLogger(__name__)
 bp = Blueprint('devices', __name__, url_prefix='/devices')
 
-@bp.route('/add', methods=['POST'])
-@login_required
-def add_device():
-    if not request.is_json:
-        return jsonify({'error': 'Content-Type must be application/json'}), 400
-        
-    data = request.get_json()
-    device_code = data.get('device_code')
-    device_name = data.get('device_name')
-    user_id = session.get('user_id')
-
-    logger.debug(f"Adding device: {device_name} ({device_code}) for user {user_id}")
-
-    if not all([device_code, device_name, user_id]):
-        return jsonify({'error': 'Missing required data'}), 400
-
+@bp.route('/generate-code', methods=['POST'])
+def generate_code():
     try:
-        db = get_db()
-        cursor = db.cursor()
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+            
+        # Generate unique code
+        code = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
         
-        cursor.execute('SELECT id FROM devices WHERE device_code = ?', (device_code,))
-        if cursor.fetchone():
-            return jsonify({'error': 'Device already exists'}), 409
-
-        cursor.execute(
-            'INSERT INTO devices (device_code, device_name, user_id) VALUES (?, ?, ?)',
-            (device_code, device_name, user_id)
+        # Generate QR code
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
         )
-        device_id = cursor.lastrowid
+        qr.add_data(code)
+        qr.make(fit=True)
+        
+        # Convert QR code to base64 string
+        img = qr.make_image(fill_color="black", back_color="white")
+        buffered = io.BytesIO()
+        img.save(buffered, format="PNG")
+        qr_code = base64.b64encode(buffered.getvalue()).decode()
+        
+        # Store in pending_devices
+        db = get_db()
+        db.execute(
+            'INSERT INTO pending_devices (code, user_id, created_at) VALUES (?, ?, CURRENT_TIMESTAMP)',
+            (code, session['user_id'])
+        )
         db.commit()
         
-        device_data = {
-            'id': device_id,
-            'device_code': device_code,
-            'device_name': device_name
-        }
+        return jsonify({
+            'success': True,
+            'code': code,
+            'qr_code': f'data:image/png;base64,{qr_code}'
+        })
         
-        emit('device_added', device_data, broadcast=True)
-        return jsonify({'success': True, 'device': device_data}), 201
-
     except Exception as e:
-        logger.error(f"Database error: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@bp.route('/list', methods=['GET'])
-@login_required
-def list_devices():
-    db = get_db()
-    devices = db.execute(
-        'SELECT id, device_code, device_name FROM devices WHERE user_id = ?',
-        (session['user_id'],)
-    ).fetchall()
-    return jsonify([dict(device) for device in devices])
+        return jsonify({'success': False, 'error': str(e)}), 500

@@ -471,6 +471,15 @@ main {
     padding: 20px;
     background: white;
     border-radius: 8px;
+    text-align: center;
+}
+
+.qr-code {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 200px;
+    margin: 0 auto;
 }
 
 .qr-container img {
@@ -492,6 +501,22 @@ main {
     letter-spacing: 2px;
 }
 
+.code-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.connection-code {
+    font-family: monospace;
+    font-size: 24px;
+    background: #333;
+    color: #00a65a;
+    padding: 15px;
+    border-radius: 4px;
+    margin: 15px 0;
+    letter-spacing: 2px;
+}
+
 .code-text {
     font-family: monospace;
     font-size: 28px;
@@ -508,4 +533,10 @@ main {
 
 .copy-btn:hover {
     color: var(--accent);
+}
+
+.error-message {
+    color: #ff4444;
+    text-align: center;
+    padding: 20px;
 }
