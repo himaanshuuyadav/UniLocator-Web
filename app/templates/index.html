@@ -63,6 +63,9 @@
                                         {% endif %}
                                     </p>
                                 </div>
+                                <button class="remove-device-btn" data-device-code="{{ device.code }}">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
                             </div>
                         {% endfor %}
                     </div>
@@ -143,11 +146,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Step 3 Content -->
-    <div id="step3Content" class="step-content">
-        <!-- Content will be dynamically inserted here -->
     </div>
 
     <!-- Scripts -->

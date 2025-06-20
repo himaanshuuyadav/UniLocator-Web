@@ -28,8 +28,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function generateUniqueCode(method) {
         console.log('Generating code for method:', method); // Debug log
 
-        // Show loading state
-        document.getElementById('step3Content').innerHTML = '<div class="loading">Generating code...</div>';
+        // Show loading state in the correct modal container
+        if (method === 'qr') {
+            document.getElementById('qrCode').innerHTML = '<div class="loading">Generating QR code...</div>';
+        } else {
+            document.getElementById('connectionCode').innerHTML = '<div class="loading">Generating code...</div>';
+        }
 
         fetch('/devices/generate-code', {
             method: 'POST',
@@ -40,41 +44,32 @@ document.addEventListener('DOMContentLoaded', function() {
             credentials: 'same-origin'
         })
         .then(response => {
-            console.log('Response status:', response.status); // Debug log
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log('Received data:', data); // Debug log
-
             if (data.success) {
-                const step3Content = document.getElementById('step3Content');
                 if (method === 'qr') {
-                    step3Content.innerHTML = `
-                        <div class="qr-container">
-                            <img src="${data.qr_code}" alt="QR Code" class="qr-code">
-                            <p class="mt-3">Scan this QR code using the UniLocator app</p>
-                        </div>`;
+                    document.getElementById('qrCode').innerHTML = `
+                        <img src="${data.qr_code}" alt="QR Code" class="qr-code">
+                    `;
                 } else {
-                    step3Content.innerHTML = `
-                        <div class="code-container">
-                            <div class="connection-code">${data.code}</div>
-                            <p class="mt-3">Enter this code in your UniLocator app</p>
-                        </div>`;
+                    document.getElementById('connectionCode').innerHTML = `
+                        <div class="connection-code">${data.code}</div>
+                    `;
                 }
             } else {
                 throw new Error(data.error || 'Failed to generate code');
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('step3Content').innerHTML = `
-                <div class="error-message">
-                    <p>Error generating code. Please try again.</p>
-                    <small>${error.message}</small>
-                </div>`;
+            if (method === 'qr') {
+                document.getElementById('qrCode').innerHTML = `<div class="error-message">Error generating QR code.<br><small>${error.message}</small></div>`;
+            } else {
+                document.getElementById('connectionCode').innerHTML = `<div class="error-message">Error generating code.<br><small>${error.message}</small></div>`;
+            }
         });
     }
 
@@ -83,11 +78,9 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', () => {
             methodBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
             const method = btn.dataset.method;
             const qrMethod = modal.querySelector('.qr-method');
             const codeMethod = modal.querySelector('.code-method');
-            
             if (method === 'qr') {
                 qrMethod.classList.remove('hidden');
                 codeMethod.classList.add('hidden');
@@ -95,11 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 qrMethod.classList.add('hidden');
                 codeMethod.classList.remove('hidden');
             }
-            
-            // Generate code when method is selected
-            generateUniqueCode(method);
-            currentStep = 2;
-            showStep(currentStep);
+            // Only generate code when reaching step 3 (after clicking Next)
         });
     });
 
@@ -109,6 +98,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentStep < totalSteps) {
                 currentStep++;
                 showStep(currentStep);
+                // If moving to step 3, generate code/QR for selected method
+                if (currentStep === 3) {
+                    const selectedMethodBtn = modal.querySelector('.method-btn.active');
+                    if (selectedMethodBtn) {
+                        const method = selectedMethodBtn.dataset.method;
+                        generateUniqueCode(method);
+                    }
+                }
+            } else if (currentStep === totalSteps) {
+                // Optionally, close modal or reset after finish
+                modal.style.display = 'none';
+                resetSteps();
             }
         });
     }
@@ -271,6 +272,39 @@ document.addEventListener('DOMContentLoaded', function() {
     socket.on('device_added', function(device) {
         console.log('New device added:', device);
         addDeviceToUI(device);
+    });
+
+    // Remove device functionality
+    const removeDeviceBtns = document.querySelectorAll('.remove-device-btn');
+    removeDeviceBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const deviceCode = this.getAttribute('data-device-code');
+            if (confirm('Are you sure you want to remove this device?')) {
+                fetch('/devices/remove-device', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ device_code: deviceCode })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the device card from the UI
+                        this.closest('.device-card').remove();
+                        alert('Device removed successfully!');
+                    } else {
+                        alert('Failed to remove device: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Error removing device. Please try again.');
+                    console.error(error);
+                });
+            }
+        });
     });
 
     console.log('Main script initialized');
