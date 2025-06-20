@@ -154,16 +154,19 @@ def update_location(device_code):
     data = request.get_json()
     lat = data.get('lat')
     lng = data.get('lng')
+    battery = data.get('battery')
+    network = data.get('network')
     db = get_db()
     db.execute(
-        'UPDATE connected_devices SET last_latitude = ?, last_longitude = ?, last_seen = CURRENT_TIMESTAMP WHERE device_code = ?',
-        (lat, lng, device_code)
+        'UPDATE connected_devices SET last_latitude = ?, last_longitude = ?, last_battery = ?, last_network = ?, last_seen = CURRENT_TIMESTAMP WHERE device_code = ?',
+        (lat, lng, battery, network, device_code)
     )
     db.commit()
-    # Optionally emit a socket event for real-time update
     socketio.emit('device_location_updated', {
         'device_code': device_code,
         'lat': lat,
-        'lng': lng
+        'lng': lng,
+        'battery': battery,
+        'network': network
     })
     return jsonify({'success': True})

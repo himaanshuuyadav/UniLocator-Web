@@ -74,6 +74,8 @@
                                             Waiting for location...
                                         {% endif %}
                                     </p>
+                                    <p><i class="fas fa-battery-half"></i> Battery: {{ device.last_battery if device.last_battery is defined else 'Unknown' }}%</p>
+                                    <p><i class="fas fa-wifi"></i> Network: {{ device.last_network if device.last_network is defined else 'Unknown' }}</p>
                                 </div>
                             </div>
                         {% endfor %}
