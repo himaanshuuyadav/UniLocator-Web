@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Main script loading...');
 
+    // Restore original static event listeners and simple step logic
     // Get modal elements
     const modal = document.getElementById('addDeviceModal');
     const addDeviceBtns = document.querySelectorAll('.add-device-btn');
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addDeviceBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             if (modal) {
+                modal.classList.add('show');
                 modal.style.display = 'block';
                 resetSteps();
                 console.log('Opening modal');
@@ -82,20 +84,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const qrMethod = modal.querySelector('.qr-method');
             const codeMethod = modal.querySelector('.code-method');
             if (method === 'qr') {
-                qrMethod.classList.remove('hidden');
-                codeMethod.classList.add('hidden');
+                if (qrMethod) qrMethod.classList.remove('hidden');
+                if (codeMethod) codeMethod.classList.add('hidden');
             } else {
-                qrMethod.classList.add('hidden');
-                codeMethod.classList.remove('hidden');
+                if (qrMethod) qrMethod.classList.add('hidden');
+                if (codeMethod) codeMethod.classList.remove('hidden');
             }
-            // Only generate code when reaching step 3 (after clicking Next)
+            // Enable Next button if on step 2
+            if (currentStep === 2 && nextBtn) nextBtn.disabled = false;
         });
     });
 
-    // Next button handler
     if (nextBtn) {
         nextBtn.addEventListener('click', () => {
             if (currentStep < totalSteps) {
+                // On step 2, only allow if a method is selected
+                if (currentStep === 2) {
+                    const selectedMethodBtn = modal.querySelector('.method-btn.active');
+                    if (!selectedMethodBtn) return;
+                }
                 currentStep++;
                 showStep(currentStep);
                 // If moving to step 3, generate code/QR for selected method
@@ -107,14 +114,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } else if (currentStep === totalSteps) {
-                // Optionally, close modal or reset after finish
                 modal.style.display = 'none';
                 resetSteps();
             }
         });
     }
 
-    // Previous button handler
     if (prevBtn) {
         prevBtn.addEventListener('click', () => {
             if (currentStep > 1) {
@@ -124,32 +129,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Close button handler
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-            resetSteps();
-        });
-    }
-
-    // Close modal when clicking outside
-    window.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-            resetSteps();
-        }
-    });
-
     function showStep(step) {
         const steps = modal.querySelectorAll('.step');
         steps.forEach((s, index) => {
             s.classList.toggle('active', index + 1 === step);
         });
-        
-        prevBtn.disabled = step === 1;
-        nextBtn.innerHTML = step === totalSteps ? 
-            'Finish <i class="fas fa-check"></i>' : 
-            'Next <i class="fas fa-arrow-right"></i>';
+
+        if (prevBtn) prevBtn.disabled = step === 1;
+        if (nextBtn) {
+            nextBtn.innerHTML = step === totalSteps ?
+                'Finish <i class="fas fa-check"></i>' :
+                'Next <i class="fas fa-arrow-right"></i>';
+        }
+
+        // Only disable Next on step 2 if no method is selected
+        if (step === 2) {
+            if (nextBtn) nextBtn.disabled = true;
+            const selectedMethodBtn = modal.querySelector('.method-btn.active');
+            if (selectedMethodBtn && nextBtn) nextBtn.disabled = false;
+        } else {
+            if (nextBtn) nextBtn.disabled = false;
+        }
     }
 
     function resetSteps() {
@@ -162,12 +162,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const qrMethod = modal.querySelector('.qr-method');
         const codeMethod = modal.querySelector('.code-method');
-        if (qrMethod && codeMethod) {
-            qrMethod.classList.add('hidden');
-            codeMethod.classList.add('hidden');
-        }
+        if (qrMethod) qrMethod.classList.add('hidden');
+        if (codeMethod) codeMethod.classList.add('hidden');
 
-        // Clear QR code and connection code
+        // Clear QR code and connection code containers if they exist
         const qrContainer = document.getElementById('qrCode');
         const codeContainer = document.getElementById('connectionCode');
         if (qrContainer) qrContainer.innerHTML = '';
@@ -264,6 +262,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <p><i class="fas fa-qrcode"></i> ID: ${device.device_code}</p>
                 <p><i class="fas fa-clock"></i> Added: Just now</p>
             </div>
+            <div class="device-actions">
+                <button class="device-menu-btn"><i class="fas fa-ellipsis-v"></i></button>
+                <div class="device-menu-dropdown">
+                    <button class="remove-device-btn" data-device-code="${device.device_code}">Remove Device</button>
+                </div>
+            </div>
         `;
         devicesGrid.appendChild(deviceCard);
     }
@@ -274,10 +278,34 @@ document.addEventListener('DOMContentLoaded', function() {
         addDeviceToUI(device);
     });
 
-    // Remove device functionality
+    // Device 3-dot menu functionality
+    const deviceCards = document.querySelectorAll('.device-card');
+    deviceCards.forEach(card => {
+        const menuBtn = card.querySelector('.device-menu-btn');
+        const menuDropdown = card.querySelector('.device-menu-dropdown');
+        if (menuBtn && menuDropdown) {
+            menuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // Close all other open menus
+                document.querySelectorAll('.device-actions.open').forEach(el => {
+                    if (el !== menuBtn.parentElement) el.classList.remove('open');
+                });
+                menuBtn.parentElement.classList.toggle('open');
+            });
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!card.contains(e.target)) {
+                    menuBtn.parentElement.classList.remove('open');
+                }
+            });
+        }
+    });
+
+    // Remove device functionality (unchanged)
     const removeDeviceBtns = document.querySelectorAll('.remove-device-btn');
     removeDeviceBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
             const deviceCode = this.getAttribute('data-device-code');
             if (confirm('Are you sure you want to remove this device?')) {
                 fetch('/devices/remove-device', {
@@ -292,7 +320,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Remove the device card from the UI
                         this.closest('.device-card').remove();
                         alert('Device removed successfully!');
                     } else {
@@ -304,6 +331,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error(error);
                 });
             }
+            // Close the menu after action
+            this.closest('.device-actions').classList.remove('open');
         });
     });
 

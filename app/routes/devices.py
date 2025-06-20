@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify, session
-from flask_socketio import emit, SocketIO
+from flask_socketio import emit
+from app import socketio
 from functools import wraps
 from ..utils.database import get_db
 from ..models.device import Device
@@ -12,7 +13,7 @@ import base64
 import json
 
 bp = Blueprint('devices', __name__, url_prefix='/devices')
-socketio = SocketIO()
+# socketio = SocketIO()
 
 # Login required decorator
 def login_required(f):
@@ -102,7 +103,7 @@ def connect_device():
             "message": "Invalid code"
         }), 200
     user_id = pending_device[0]
-    device_name = f"Device_{device_code[:6]}"
+    device_name = data.get('device_name') or f"Device_{device_code[:6]}"
     # Add to connected_devices
     db.execute('INSERT INTO connected_devices (user_id, device_code, device_name) VALUES (?, ?, ?)', (user_id, device_code, device_name))
     # Remove from pending_devices
@@ -114,7 +115,7 @@ def connect_device():
         'device_code': device_code,
         'device_name': device_name,
         'user_id': user_id
-    }, broadcast=True)
+    })
     return jsonify({
         "success": True,
         "message": "Device connected successfully",
@@ -142,8 +143,27 @@ def remove_device():
     socketio.emit('device_removed', {
         'device_code': device_code,
         'user_id': user_id
-    }, broadcast=True)
+    })
     return jsonify({
         'success': True,
         'message': 'Device removed successfully.'
     }), 200
+
+@bp.route('/location/<device_code>', methods=['POST'])
+def update_location(device_code):
+    data = request.get_json()
+    lat = data.get('lat')
+    lng = data.get('lng')
+    db = get_db()
+    db.execute(
+        'UPDATE connected_devices SET last_latitude = ?, last_longitude = ?, last_seen = CURRENT_TIMESTAMP WHERE device_code = ?',
+        (lat, lng, device_code)
+    )
+    db.commit()
+    # Optionally emit a socket event for real-time update
+    socketio.emit('device_location_updated', {
+        'device_code': device_code,
+        'lat': lat,
+        'lng': lng
+    })
+    return jsonify({'success': True})
