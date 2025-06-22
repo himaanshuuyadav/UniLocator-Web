@@ -11,6 +11,7 @@ import qrcode
 import io
 import base64
 import json
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 bp = Blueprint('devices', __name__, url_prefix='/devices')
 # socketio = SocketIO()
@@ -150,13 +151,20 @@ def remove_device():
     }), 200
 
 @bp.route('/location/<device_code>', methods=['POST'])
+@jwt_required()
 def update_location(device_code):
+    user_id = get_jwt_identity()
     data = request.get_json()
     lat = data.get('lat')
     lng = data.get('lng')
     battery = data.get('battery')
     network = data.get('network')
     db = get_db()
+    # Optionally, check if device belongs to user
+    cursor = db.execute('SELECT user_id FROM connected_devices WHERE device_code = ?', (device_code,))
+    row = cursor.fetchone()
+    if not row or row[0] != user_id:
+        return jsonify({'success': False, 'error': 'Unauthorized or device not found.'}), 403
     db.execute(
         'UPDATE connected_devices SET last_latitude = ?, last_longitude = ?, last_battery = ?, last_network = ?, last_seen = CURRENT_TIMESTAMP WHERE device_code = ?',
         (lat, lng, battery, network, device_code)

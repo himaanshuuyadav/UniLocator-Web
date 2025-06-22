@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from ..utils.database import get_db
+from flask_jwt_extended import create_access_token
 
 bp = Blueprint('auth', __name__)
 
@@ -96,3 +97,27 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('main.dashboard'))
+
+@bp.route('/login-api', methods=['POST'])
+def login_api():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    
+    db = get_db()
+    user = db.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+    
+    if user is None or not check_password_hash(user['password'], password):
+        return jsonify({
+            'success': False,
+            'message': 'Invalid email or password'
+        }), 401
+
+    # Create JWT token
+    access_token = create_access_token(identity=user['id'])
+    return jsonify({
+        'success': True,
+        'token': access_token,
+        'user_id': user['id'],
+        'email': user['email']
+    })
