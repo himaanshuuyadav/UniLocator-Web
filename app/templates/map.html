@@ -8,6 +8,11 @@
     <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/map.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         body, html { margin: 0; padding: 0; height: 100%; }
@@ -15,40 +20,80 @@
     </style>
 </head>
 <body>
-    <div id="map"></div>
+    <div class="map-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="device-info">
+                <h1 class="device-name">{{ device_name or 'Device' }}</h1>
+                <div class="device-meta">
+                    <div>ID: {{ device_id }}</div>
+                </div>
+                <div class="tracking-status">
+                    <span class="dot"></span> Live tracking
+                </div>
+            </div>
+            
+            <div class="actions">
+                <h3>Device Actions</h3>
+                <button class="action-btn" id="centerMapBtn">
+                    <i class="fas fa-crosshairs"></i> Center on device
+                </button>
+                <button class="action-btn" id="playSoundBtn">
+                    <i class="fas fa-bell"></i> Play sound
+                </button>
+                <button class="action-btn" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i> Refresh location
+                </button>
+                <button class="action-btn" id="historyBtn">
+                    <i class="fas fa-history"></i> View history
+                </button>
+            </div>
+            
+            <div class="system-info">
+                <h3>Device Information</h3>
+                <div class="info-row">
+                    <div class="label">Last update:</div>
+                    <div class="value" id="lastUpdate">--:--</div>
+                </div>
+                <div class="info-row">
+                    <div class="label">Battery:</div>
+                    <div class="value battery-indicator">
+                        <span id="batteryPercentage">--</span>
+                        <div class="battery-level">
+                            <div class="battery-fill" id="batteryFill"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="label">Network:</div>
+                    <div class="value" id="networkStatus">--</div>
+                </div>
+                <div class="info-row">
+                    <div class="label">Coordinates:</div>
+                    <div class="value" id="coordinates">--</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Map Content -->
+        <div class="map-content">
+            <div class="map-header">
+                <a href="{{ url_for('main.home') }}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+                <div class="location-info">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span id="locationStatus">Retrieving location...</span>
+                </div>
+            </div>
+            
+            <div id="map"></div>
+        </div>
+    </div>
 
     <script>
-        // 🌍 Initialize map and marker
-        const map = L.map('map').setView([0, 0], 2);
-        const marker = L.marker([0, 0]).addTo(map);
-
-        // 🗺️ Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19
-        }).addTo(map);
-
-        // 🔁 Poll Flask server every 5 seconds
-        async function updateLocation() {
-            try {
-                const res = await fetch(`/get_location/{{ device_id }}`);
-                const data = await res.json();
-
-                const lat = data.lat;
-                const lng = data.lng;
-
-                // ✅ Update marker and center map
-                marker.setLatLng([lat, lng]);
-                map.setView([lat, lng], 16);
-
-                console.log("✅ Updated location on map:", lat, lng);
-            } catch (err) {
-                console.error("❌ Failed to fetch location", err);
-            }
-        }
-
-        // Refresh every 5 seconds
-        setInterval(updateLocation, 5000);
-        updateLocation(); // call once initially
+        window.deviceId = "{{ device_id }}";
     </script>
+    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 </body>
 </html>

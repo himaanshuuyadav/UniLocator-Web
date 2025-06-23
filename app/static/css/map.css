@@ -1,0 +1,200 @@
+body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+        
+        .map-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-dark);
+            /* border-right: 1px solid var(--border); */
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .device-info {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .device-name {
+            font-size: 1.5rem;
+            margin: 0 0 10px 0;
+            color: var(--text-primary);
+        }
+        
+        .device-meta {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        
+        .actions {
+            padding: 20px;
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .action-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .action-btn i {
+            color: var(--accent);
+            font-size: 1.2rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .action-btn:hover i {
+            color: white;
+        }
+        
+        .map-content {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #map {
+            flex: 1;
+            border-radius: 12px;
+            margin: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+        
+        .map-header {
+            padding: 12px 20px;
+            /* border-bottom: 1px solid var(--border); */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .back-btn {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s ease;
+        }
+        
+        .back-btn:hover {
+            color: var(--accent);
+        }
+        
+        .location-info {
+            background: var(--bg-dark);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .location-info i {
+            color: var(--accent);
+        }
+        
+        .tracking-status {
+            color: #4CAF50;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .tracking-status .dot {
+            width: 10px;
+            height: 10px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+        
+        .system-info {
+            padding: 20px;
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .info-row .label {
+            color: var(--text-secondary);
+        }
+        
+        .info-row .value {
+            font-weight: 500;
+        }
+        
+        .battery-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .battery-level {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .battery-fill {
+            height: 100%;
+            background: #4CAF50;
+            border-radius: 3px;
+            width: 70%; /* Will be set dynamically */
+        }
+        
+        .leaflet-control-attribution {
+            font-size: 8px;
+            background: transparent;
+            color: var(--text-secondary);
+            right: 10px !important;
+            left: auto !important;
+            bottom: 5px !important;
+        }

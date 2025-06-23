@@ -76,6 +76,10 @@
                                     </p>
                                     <p><i class="fas fa-battery-half"></i> Battery: {{ device.last_battery if device.last_battery is defined else 'Unknown' }}%</p>
                                     <p><i class="fas fa-wifi"></i> Network: {{ device.last_network if device.last_network is defined else 'Unknown' }}</p>
+                                    
+                                    <a href="{{ url_for('main.show_map', device_id=device.code) }}" class="btn-map" target="_blank">
+                                        <i class="fas fa-map"></i> Track
+                                    </a>
                                 </div>
                             </div>
                         {% endfor %}

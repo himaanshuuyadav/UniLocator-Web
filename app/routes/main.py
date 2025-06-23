@@ -39,3 +39,8 @@ def home():
         device_list.append(device_data)
     conn.close()
     return render_template('index.html', devices=device_list, user_name=session.get('user_name', 'User'))
+
+@bp.route('/map/<device_id>')
+def show_map(device_id):
+    # You can fetch device info from the database if needed
+    return render_template('map.html', device_id=device_id)
