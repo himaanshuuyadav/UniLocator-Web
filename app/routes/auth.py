@@ -114,7 +114,7 @@ def login_api():
         }), 401
 
     # Create JWT token
-    access_token = create_access_token(identity=user['id'])
+    access_token = create_access_token(identity=str(user['id']))
     return jsonify({
         'success': True,
         'token': access_token,

@@ -178,3 +178,21 @@ def update_location(device_code):
         'network': network
     })
     return jsonify({'success': True})
+
+@bp.route('/list', methods=['GET'])
+@jwt_required()
+def list_devices():
+    user_id = get_jwt_identity()
+    db = get_db()
+    devices = db.execute(
+        'SELECT device_name, device_code, last_seen FROM connected_devices WHERE user_id = ?',
+        (user_id,)
+    ).fetchall()
+    result = []
+    for device in devices:
+        result.append({
+            "device_name": device["device_name"],
+            "device_code": device["device_code"],
+            "last_seen": device["last_seen"]
+        })
+    return jsonify(result)
