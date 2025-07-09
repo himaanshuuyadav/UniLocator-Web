@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "762228704297",
+    "project_id": "unilocator-a542b",
+    "storage_bucket": "unilocator-a542b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:762228704297:android:f5bba6b926c2260a1b8838",
+        "android_client_info": {
+          "package_name": "com.pramanshav.unilocator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjp41bhPn9CqXRKIWxXQBtMBzdG9JN7ic"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
