@@ -1,9 +1,59 @@
-instance/
+# Flutter/Dart
+**/build/
+**/.dart_tool/
+**/.packages
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.metadata
+**/.android/
+**/.ios/
+**/.idea/
+**/.vscode/
+**/pubspec.lock
+**/.gradle/
+**/.DS_Store
+**/coverage/
+
+# Python
 __pycache__/
 *.pyc
-.env
-.venv/
-venv/
-env/
+*.pyo
+*.pyd
 *.db
+*.sqlite3
+*.egg-info/
+*.log
+instance/unilocator.db
+
+# VSCode/IDE
+.vscode/
+*.iml
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Node/npm (if any)
+node_modules/
+
+# Backup/Export
+*.bak
+*.swp
+*.tmp
+backup/
+
+# Misc
+*.orig
+*.rej
+
+# Ignore generated files
+*.generated.*
+
+# Ignore test output
+**/test-output/
+
+# Ignore Android Studio local properties
+**/local.properties
