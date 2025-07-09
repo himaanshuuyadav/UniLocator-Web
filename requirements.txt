@@ -1,8 +1,10 @@
 Flask==3.0.0
 Flask-SocketIO==5.3.6
+Flask-CORS==4.0.0
+Flask-JWT-Extended==4.6.0
 python-socketio==5.10.0
 python-engineio==4.8.0
-gevent==23.9.1
+gevent==23.7.0
 gevent-websocket==0.10.1
 Werkzeug==3.0.1
 qrcode==7.4.2

@@ -11,8 +11,8 @@
     <nav>
         <div class="logo">UniLocator</div>
         <div class="nav-buttons">
-            <a href="{{ url_for('auth.login') }}" class="btn btn-login">Log in</a>
-            <a href="{{ url_for('auth.register') }}" class="btn btn-signup">Sign up</a>
+            <a href="/firebase_auth/web/login.html" class="btn btn-login">Log in</a>
+            <a href="/firebase_auth/web/register.html" class="btn btn-signup">Sign up</a>
         </div>
     </nav>
 
@@ -25,30 +25,55 @@
                 Seamlessly monitor and locate your devices in real-time with our powerful tracking solution.
                 Built with advanced technology for reliable device management.
             </p>
-            <a href="{{ url_for('auth.register') }}" class="btn btn-cta">Get Started for free →</a>
+            <a href="/firebase_auth/web/register.html" class="btn btn-cta">Get Started for free →</a>
         </div>
 
-        <div class="features">
-            <div class="feature-card">
-                <i class="fas fa-map-marker-alt"></i>
-                <h3>Real-time Tracking</h3>
-                <p>Monitor your devices' locations with precision and accuracy</p>
+        <div class="features-section">
+            <h2 class="features-title">Features</h2>
+            <div class="features-headline">
+                <h1>Blazingly fast to help your<br>devices stay connected</h1>
             </div>
-            <div class="feature-card">
-                <i class="fas fa-battery-full"></i>
-                <h3>Battery Monitoring</h3>
-                <p>Keep track of device battery levels and get low battery alerts</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-history"></i>
-                <h3>Location History</h3>
-                <p>Access detailed history of device movements and patterns</p>
+            
+            <div class="features-container">
+                <div class="features-tabs">
+                    <div class="feature-tab active" data-tab="tab1">
+                        <h3>Real-time Tracking</h3>
+                        <div class="tab-description">Monitor your devices' locations with precision and accuracy in real-time.</div>
+                    </div>
+                    <div class="feature-tab" data-tab="tab2">
+                        <h3>Battery Monitoring</h3>
+                        <div class="tab-description">Keep track of device battery levels and get low battery alerts.</div>
+                    </div>
+                    <div class="feature-tab" data-tab="tab3">
+                        <h3>Location History</h3>
+                        <div class="tab-description">Access detailed history of device movements and patterns.</div>
+                    </div>
+                    <div class="feature-tab" data-tab="tab4">
+                        <h3>Continuous Improvement</h3>
+                        <div class="tab-description">Our platform is constantly improving with new features and performance enhancements.</div>
+                    </div>
+                </div>
+                <div class="features-content">
+                    <div class="feature-image-container active" id="tab1-content">
+                        <img src="{{ url_for('static', filename='img/features/feature-tracking.jpg') }}" alt="Real-time Tracking" class="feature-image" onerror="this.src='https://images.unsplash.com/photo-1596526131083-e8c633c948d2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8dGVjaG5vbG9neXx8fHx8fDE2MTI5MzYyMDc&ixlib=rb-1.2.1&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1080'">
+                    </div>
+                    <div class="feature-image-container" id="tab2-content">
+                        <img src="{{ url_for('static', filename='img/features/feature-battery.jpg') }}" alt="Battery Monitoring" class="feature-image" onerror="this.src='https://images.unsplash.com/photo-1606229365485-93a3b8ee0385?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8YmF0dGVyeXx8fHx8fDE2MTI5MzYyNjA&ixlib=rb-1.2.1&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1080'">
+                    </div>
+                    <div class="feature-image-container" id="tab3-content">
+                        <img src="{{ url_for('static', filename='img/features/feature-history.jpg') }}" alt="Location History" class="feature-image" onerror="this.src='https://images.unsplash.com/photo-1521295121783-8a321d551ad2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8bWFwfHx8fHx8MTYxMjkzNjMwNw&ixlib=rb-1.2.1&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1080'">
+                    </div>
+                    <div class="feature-image-container" id="tab4-content">
+                        <img src="{{ url_for('static', filename='img/features/feature-improvement.jpg') }}" alt="Continuous Improvement" class="feature-image" onerror="this.src='https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8dGVjaHx8fHx8fDE2MTI5MzYzNDI&ixlib=rb-1.2.1&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1080'">
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script src="{{ url_for('static', filename='js/particles-config.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
     <script src="{{ url_for('static', filename='js/add_device.js') }}"></script>
 </body>

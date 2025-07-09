@@ -12,10 +12,10 @@
         <div class="nav-content">
             <div class="logo">UniLocator</div>
             <div class="nav-actions">
+                <span class="user-name" id="navbar-username"></span>
                 <div class="profile-dropdown">
                     <button class="profile-btn">
                         <i class="fas fa-user-circle"></i>
-                        <span class="user-name">{{ user_name }}</span>
                         <i class="fas fa-chevron-down"></i>
                     </button>
                     <div class="dropdown-content">
@@ -26,7 +26,7 @@
                             <i class="fas fa-cog"></i> Settings
                         </a>
                         <div class="dropdown-divider"></div>
-                        <a href="{{ url_for('auth.logout') }}" class="dropdown-item">
+                        <a href="#" class="dropdown-item" onclick="window.authService.logout(); window.location.href='/firebase_auth/web/login.html'; return false;">
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </a>
                     </div>
@@ -173,5 +173,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/add_device.js') }}"></script>
+
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <!-- Firebase Auth -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <!-- Firebase Config and Auth Service -->
+    <script src="/firebase_auth/web/firebase-config-cdn.js"></script>
+    <script src="/firebase_auth/web/auth-service-cdn.js"></script>
 </body>
 </html>

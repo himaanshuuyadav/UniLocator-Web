@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify, session
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify
 from flask_socketio import emit
 from app import socketio
 from functools import wraps
@@ -12,26 +12,21 @@ import io
 import base64
 import json
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import request, jsonify
+
 
 bp = Blueprint('devices', __name__, url_prefix='/devices')
 # socketio = SocketIO()
 
-# Login required decorator
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
-        return f(*args, **kwargs)
-    return decorated_function
-
-@bp.route('/generate-code', methods=['POST'])
-@login_required
+  # Removed login_required decorator (no longer needed)
 def generate_code():
     try:
+        # Expect Firebase UID from frontend (e.g., header 'X-User-UID')
+        firebase_uid = request.headers.get('X-User-UID')
+        if not firebase_uid:
+            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
         # Generate unique 8-character code
         code = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
-        
         # Generate QR code
         qr = qrcode.QRCode(
             version=1,
@@ -41,23 +36,21 @@ def generate_code():
         )
         connection_data = {
             "server_url": request.host_url.rstrip('/'),
-            "user_id": session['user_id'],
+            "user_id": firebase_uid,
             "device_code": code
         }
         qr.add_data(json.dumps(connection_data))
         qr.make(fit=True)
-        
         # Convert QR code to base64 string
         img = qr.make_image(fill_color="black", back_color="white")
         buffered = io.BytesIO()
         img.save(buffered, format="PNG")
         qr_code = base64.b64encode(buffered.getvalue()).decode()
-        
         # Store in pending_devices
         db = get_db()
         db.execute(
             'INSERT INTO pending_devices (user_id, device_code, created_at) VALUES (?, ?, CURRENT_TIMESTAMP)',
-            (session['user_id'], code)
+            (firebase_uid, code)
         )
         db.commit()
         
@@ -124,26 +117,27 @@ def connect_device():
     }), 200
 
 @bp.route('/remove-device', methods=['POST'])
-@login_required
 def remove_device():
     data = request.get_json()
     device_code = data.get('device_code')
-    user_id = session['user_id']
+    firebase_uid = request.headers.get('X-User-UID')
+    if not firebase_uid:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
     db = get_db()
     # Check if device exists and belongs to user
-    cursor = db.execute('SELECT id FROM connected_devices WHERE device_code = ? AND user_id = ?', (device_code, user_id))
+    cursor = db.execute('SELECT id FROM connected_devices WHERE device_code = ? AND user_id = ?', (device_code, firebase_uid))
     device = cursor.fetchone()
     if not device:
         return jsonify({
             'success': False,
             'message': 'Device not found or not authorized.'
         }), 200
-    db.execute('DELETE FROM connected_devices WHERE device_code = ? AND user_id = ?', (device_code, user_id))
+    db.execute('DELETE FROM connected_devices WHERE device_code = ? AND user_id = ?', (device_code, firebase_uid))
     db.commit()
-    logging.info(f"[REMOVE] Device {device_code} removed for user {user_id}")
+    logging.info(f"[REMOVE] Device {device_code} removed for user {firebase_uid}")
     socketio.emit('device_removed', {
         'device_code': device_code,
-        'user_id': user_id
+        'user_id': firebase_uid
     })
     return jsonify({
         'success': True,
@@ -157,26 +151,58 @@ def update_location(device_code):
     data = request.get_json()
     lat = data.get('lat')
     lng = data.get('lng')
-    battery = data.get('battery')
-    network = data.get('network')
     db = get_db()
-    # Optionally, check if device belongs to user
     cursor = db.execute('SELECT user_id FROM connected_devices WHERE device_code = ?', (device_code,))
     row = cursor.fetchone()
     if not row or row[0] != user_id:
         return jsonify({'success': False, 'error': 'Unauthorized or device not found.'}), 403
     db.execute(
-        'UPDATE connected_devices SET last_latitude = ?, last_longitude = ?, last_battery = ?, last_network = ?, last_seen = CURRENT_TIMESTAMP WHERE device_code = ?',
-        (lat, lng, battery, network, device_code)
+        '''UPDATE connected_devices
+           SET last_latitude = ?, last_longitude = ?, last_seen = CURRENT_TIMESTAMP
+           WHERE device_code = ?''',
+        (lat, lng, device_code)
     )
     db.commit()
-    socketio.emit('device_location_updated', {
-        'device_code': device_code,
-        'lat': lat,
-        'lng': lng,
-        'battery': battery,
-        'network': network
-    })
+    return jsonify({'success': True})
+
+@bp.route('/battery/<device_code>', methods=['POST'])
+@jwt_required()
+def update_battery(device_code):
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    battery = data.get('battery')
+    db = get_db()
+    cursor = db.execute('SELECT user_id FROM connected_devices WHERE device_code = ?', (device_code,))
+    row = cursor.fetchone()
+    if not row or row[0] != user_id:
+        return jsonify({'success': False, 'error': 'Unauthorized or device not found.'}), 403
+    db.execute(
+        '''UPDATE connected_devices
+           SET last_battery = ?, last_seen = CURRENT_TIMESTAMP
+           WHERE device_code = ?''',
+        (battery, device_code)
+    )
+    db.commit()
+    return jsonify({'success': True})
+
+@bp.route('/network/<device_code>', methods=['POST'])
+@jwt_required()
+def update_network(device_code):
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    network = data.get('network')
+    db = get_db()
+    cursor = db.execute('SELECT user_id FROM connected_devices WHERE device_code = ?', (device_code,))
+    row = cursor.fetchone()
+    if not row or row[0] != user_id:
+        return jsonify({'success': False, 'error': 'Unauthorized or device not found.'}), 403
+    db.execute(
+        '''UPDATE connected_devices
+           SET last_network = ?, last_seen = CURRENT_TIMESTAMP
+           WHERE device_code = ?''',
+        (network, device_code)
+    )
+    db.commit()
     return jsonify({'success': True})
 
 @bp.route('/list', methods=['GET'])

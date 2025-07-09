@@ -12,16 +12,7 @@
     <nav>
         <div class="nav-brand">UniLocator</div>
         <div class="nav-links">
-            {% if session.user_id %}
-                <a href="{{ url_for('main.index') }}">Home</a>
-                <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-            {% endif %}
-            {% if not session.get('user_id') %}
-                <a href="{{ url_for('auth.login') }}">Login</a>
-                <a href="{{ url_for('auth.register') }}">Register</a>
-            {% else %}
-                <a href="{{ url_for('auth.logout') }}">Logout</a>
-            {% endif %}
+            <!-- Navigation links are now handled by the frontend using Firebase Auth state -->
         </div>
     </nav>
 

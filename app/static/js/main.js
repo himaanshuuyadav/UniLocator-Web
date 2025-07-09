@@ -1,4 +1,19 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Display Firebase username in navbar
+    function updateNavbarUsername(user) {
+        var name = '';
+        if (user) {
+            name = user.displayName || user.email || 'User';
+        }
+        var nameSpan = document.getElementById('navbar-username');
+        if (nameSpan) nameSpan.textContent = name;
+    }
+    if (window.authService && window.authService.getCurrentUser) {
+        window.authService.onAuthStateChanged(updateNavbarUsername);
+    } else if (window.firebase && window.firebase.auth) {
+        window.firebase.auth().onAuthStateChanged(updateNavbarUsername);
+    }
+
     console.log('Main script loading...');
 
     // Restore original static event listeners and simple step logic
