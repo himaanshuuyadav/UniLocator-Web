@@ -21,10 +21,18 @@ def create_app():
     jwt = JWTManager(app)
     
     # Register blueprints
-    from .routes import auth, devices, main, api
-    app.register_blueprint(auth.bp, url_prefix='/auth')
-    app.register_blueprint(devices.bp, url_prefix='/devices')  # Add this line
+    from .routes import devices, main, api
+    app.register_blueprint(devices.bp, url_prefix='/devices')
     app.register_blueprint(main.bp)
     app.register_blueprint(api.bp)
     
+    # Serve Firebase web auth static files
+    import os
+    from flask import send_from_directory
+
+    @app.route('/firebase_auth/web/<path:filename>')
+    def firebase_web_auth_static(filename):
+        firebase_web_dir = os.path.join(app.root_path, '..', 'firebase_auth', 'web')
+        return send_from_directory(firebase_web_dir, filename)
+
     return app
