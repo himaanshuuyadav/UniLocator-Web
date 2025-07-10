@@ -59,6 +59,11 @@ class AuthService {
   async logout() {
     try {
       await signOut(auth);
+      // Clear Flask session
+      await fetch('/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };

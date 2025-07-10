@@ -30,12 +30,39 @@ document.addEventListener('DOMContentLoaded', function() {
         errorMessage.textContent = '';
 
         try {
+            console.log('[DEBUG] Starting Firebase registration...');
             const result = await authService.register(email, password, username);
+            console.log('[DEBUG] Firebase registration result:', result);
             
-            if (result.success) {
-                // Redirect to dashboard
-                window.location.href = '/dashboard';
+            if (result.success && result.user && result.user.uid) {
+                console.log('[DEBUG] Firebase registration successful, sending UID to Flask backend...');
+                // Send UID to Flask backend to set session
+                fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ firebase_uid: result.user.uid })
+                })
+                .then(res => {
+                    console.log('[DEBUG] Flask /login response status:', res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('[DEBUG] Flask /login response data:', data);
+                    if (data.success) {
+                        console.log('[DEBUG] Redirecting to:', data.redirect || '/dashboard');
+                        window.location.href = data.redirect || '/dashboard';
+                    } else {
+                        console.error('[DEBUG] Flask login failed:', data.error);
+                        errorMessage.textContent = data.error || 'Login failed on server.';
+                    }
+                })
+                .catch(err => {
+                    console.error('[DEBUG] Flask /login request failed:', err);
+                    errorMessage.textContent = 'Could not establish session with server. Check console for details.';
+                });
             } else {
+                console.error('[DEBUG] Firebase registration failed:', result.error);
                 // Show error message
                 errorMessage.textContent = result.error;
             }

@@ -46,25 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add event listeners only if elements exist
     if (closeBtn) {
-        closeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            closeModal();
-        });
-    }
-
-    // Close modal when clicking outside
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
-
-    // Prevent modal from closing when clicking inside modal content
-    const modalContent = modal.querySelector('.modal-content');
-    if (modalContent) {
-        modalContent.addEventListener('click', (e) => {
-            e.stopPropagation();
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('show');
+            resetSteps();
         });
     }
 
@@ -85,9 +69,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         const method = selectedMethodBtn.dataset.method;
                         generateUniqueCode(method);
                     }
-                }                } else if (currentStep === totalSteps) {
-                    closeModal();
                 }
+            } else if (currentStep === totalSteps) {
+                modal.classList.remove('show');
+                resetSteps();
+            }
         });
     }
 
@@ -204,23 +190,58 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showStep(step) {
         const steps = modal.querySelectorAll('.step');
+        const currentActive = modal.querySelector('.step.active');
+        const modalContent = modal.querySelector('.modal-content');
+        const modalBody = modal.querySelector('.modal-body');
         
-        // Simply hide all steps and show the current one
-        steps.forEach((s, index) => {
-            s.classList.remove('active');
-            if (index === step - 1) {
-                s.classList.add('active');
-            }
-        });
+        // Add transition classes
+        modalContent.classList.add('transitioning');
+        modalBody.classList.add('height-transition');
         
-        // Update button states
+        // If there's a current active step, animate it out
+        if (currentActive) {
+            currentActive.classList.add('step-exit');
+            currentActive.style.opacity = '0';
+            currentActive.style.transform = 'translateX(-30px)';
+            
+            setTimeout(() => {
+                currentActive.classList.remove('active', 'step-exit');
+                
+                // Now animate in the new step
+                const newActiveStep = steps[step - 1];
+                if (newActiveStep) {
+                    newActiveStep.classList.add('active', 'step-enter');
+                    newActiveStep.style.opacity = '1';
+                    newActiveStep.style.transform = 'translateX(0)';
+                    
+                    setTimeout(() => {
+                        newActiveStep.classList.remove('step-enter');
+                        // Remove transition classes after animation completes
+                        modalContent.classList.remove('transitioning');
+                        modalBody.classList.remove('height-transition');
+                    }, 300);
+                }
+            }, 300);
+        } else {
+            // No current active step, just show the new one
+            steps.forEach((s, index) => {
+                s.classList.toggle('active', index + 1 === step);
+            });
+            setTimeout(() => {
+                modalContent.classList.remove('transitioning');
+                modalBody.classList.remove('height-transition');
+            }, 400);
+        }
+        
         if (prevBtn) prevBtn.disabled = step === 1;
         
         if (nextBtn) {
             if (step === 2) {
+                // On step 2, disable until method is selected
                 const selectedMethod = modal.querySelector('.connection-method-btn.active');
                 nextBtn.disabled = !selectedMethod;
             } else {
+                // Step 1 and 3 should have Next/Close enabled
                 nextBtn.disabled = false;
             }
             
@@ -230,35 +251,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function closeModal() {
-        modal.classList.remove('show');
-        modal.style.display = 'none';
-        setTimeout(() => {
-            resetSteps();
-        }, 50);
-    }
-
     function resetSteps() {
         currentStep = 1;
-        
-        // Reset all steps - use simple visibility toggle
-        const steps = modal.querySelectorAll('.step');
-        steps.forEach((step, index) => {
-            step.classList.remove('active');
-            if (index === 0) {
-                step.classList.add('active');
-            }
-        });
-        
+        showStep(1);
         // Clear method selections
         methodBtns.forEach(btn => btn.classList.remove('active'));
-        
         // Hide method content
         const qrMethod = modal.querySelector('.qr-method');
         const codeMethod = modal.querySelector('.code-method');
         if (qrMethod) qrMethod.classList.add('hidden');
         if (codeMethod) codeMethod.classList.add('hidden');
-        
         // Clear generated content
         const qrCodeEl = document.getElementById('qrCode');
         const connectionCodeEl = document.getElementById('connectionCode');
@@ -273,15 +275,15 @@ document.addEventListener('DOMContentLoaded', function() {
             githubQrContainer.style.display = 'block';
             githubQrContainer.classList.remove('fade-out');
         }
-        
-        // Reset button states
-        if (prevBtn) prevBtn.disabled = true;
-        if (nextBtn) {
-            nextBtn.disabled = false;
-            nextBtn.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
-        }
     }
-
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.classList.remove('show');
+            resetSteps();
+        }
+    });
 
     // GitHub QR Code Generation
     function generateGitHubQrCode() {
@@ -304,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function generateQrCodeDataUrl(text) {
         // This is a placeholder using qr-server.com API
         // In production, you should use a local QR code library like qrcode.js
-        return `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(text)}&bgcolor=ffffff&color=037d3a&margin=20`;
+        return `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(text)}&bgcolor=ffffff&color=047a39&margin=20`;
     }
 
     // Toggle to direct download view
@@ -374,7 +376,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Close modal when pressing escape
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && modal.classList.contains('show')) {
-            closeModal();
+            modal.classList.remove('show');
+            resetSteps();
         }
     });
 

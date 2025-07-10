@@ -66,7 +66,7 @@ class DeviceDetailsScreen extends StatelessWidget {
                   child: Icon(
                     Icons.map,
                     size: 120,
-                    color: const Color(0xFF047a39),
+                    color: const Color(0xFF037d3a),
                   ),
                 ),
                 const SizedBox(height: 24),

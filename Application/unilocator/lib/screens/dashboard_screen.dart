@@ -115,7 +115,7 @@ class DashboardScreen extends StatelessWidget {
                                       children: [
                                         Icon(
                                           Icons.battery_full,
-                                          color: Color(0xFF047a39),
+                                          color: Color(0xFF037d3a),
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
@@ -127,7 +127,7 @@ class DashboardScreen extends StatelessWidget {
                                       children: [
                                         Icon(
                                           Icons.wifi,
-                                          color: Color(0xFF047a39),
+                                          color: Color(0xFF037d3a),
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
@@ -157,7 +157,7 @@ class DashboardScreen extends StatelessWidget {
                                           children: [
                                             Icon(
                                               Icons.map,
-                                              color: Color(0xFF047a39),
+                                              color: Color(0xFF037d3a),
                                             ),
                                             SizedBox(width: 8),
                                             Text('Track'),

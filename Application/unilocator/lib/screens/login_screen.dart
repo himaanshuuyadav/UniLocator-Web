@@ -78,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(Icons.location_on, size: 72, color: Color(0xFF047a39)),
+                    Icon(Icons.location_on, size: 72, color: Color(0xFF037d3a)),
                     const SizedBox(height: 24),
                     Text(
                       'Welcome to UniLocator',
@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF047a39),
+                        color: Color(0xFF037d3a),
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: _loading
                           ? Center(
                               child: CircularProgressIndicator(
-                                color: Color(0xFF047a39),
+                                color: Color(0xFF037d3a),
                               ),
                             )
                           : ElevatedButton(

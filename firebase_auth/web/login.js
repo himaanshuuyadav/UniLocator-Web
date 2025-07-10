@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check if user is already logged in
     if (authService.isAuthenticated()) {
-        window.location.href = '/';
+        window.location.href = '/dashboard';
         return;
     }
 
@@ -23,27 +23,44 @@ document.addEventListener('DOMContentLoaded', function() {
         errorMessage.textContent = '';
 
         try {
+            console.log('[DEBUG] Starting Firebase login...');
             const result = await authService.login(email, password);
+            console.log('[DEBUG] Firebase login result:', result);
             
-            if (result.success) {
-                // Redirect to index.html after successful login
-                window.location.href = '/';
+            if (result.success && result.user && result.user.uid) {
+                console.log('[DEBUG] Firebase login successful, sending UID to Flask backend...');
+                // Send UID to Flask backend to set session
+                fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ firebase_uid: result.user.uid })
+                })
+                .then(res => {
+                    console.log('[DEBUG] Flask /login response status:', res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('[DEBUG] Flask /login response data:', data);
+                    if (data.success) {
+                        console.log('[DEBUG] Redirecting to:', data.redirect || '/dashboard');
+                        window.location.href = data.redirect || '/dashboard';
+                    } else {
+                        console.error('[DEBUG] Flask login failed:', data.error);
+                        errorMessage.textContent = data.error || 'Login failed on server.';
+                    }
+                })
+                .catch(err => {
+                    console.error('[DEBUG] Flask /login request failed:', err);
+                    errorMessage.textContent = 'Could not establish session with server. Check console for details.';
+                });
             } else {
+                console.error('[DEBUG] Firebase login failed:', result.error);
                 // Show error message
                 errorMessage.textContent = mapFirebaseError(result.error);
             }
         } catch (error) {
             errorMessage.textContent = 'An unexpected error occurred. Please try again.';
-// Map Firebase Auth errors to user-friendly messages
-function mapFirebaseError(error) {
-    if (!error) return '';
-    if (error.includes('auth/user-not-found')) return 'No account found with this email.';
-    if (error.includes('auth/wrong-password')) return 'Incorrect password. Please try again.';
-    if (error.includes('auth/invalid-email')) return 'Please enter a valid email address.';
-    if (error.includes('auth/too-many-requests')) return 'Too many failed attempts. Please try again later.';
-    if (error.includes('auth/network-request-failed')) return 'Network error. Please check your connection.';
-    return error;
-}
         } finally {
             // Reset button state
             loginBtn.textContent = 'Login';
@@ -61,4 +78,15 @@ function mapFirebaseError(error) {
         this.classList.toggle('fa-eye');
         this.classList.toggle('fa-eye-slash');
     });
+
+    // Map Firebase Auth errors to user-friendly messages
+    function mapFirebaseError(error) {
+        if (!error) return '';
+        if (error.includes('auth/user-not-found')) return 'No account found with this email.';
+        if (error.includes('auth/wrong-password')) return 'Incorrect password. Please try again.';
+        if (error.includes('auth/invalid-email')) return 'Please enter a valid email address.';
+        if (error.includes('auth/too-many-requests')) return 'Too many failed attempts. Please try again later.';
+        if (error.includes('auth/network-request-failed')) return 'Network error. Please check your connection.';
+        return error;
+    }
 });

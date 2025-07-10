@@ -41,9 +41,9 @@ class UniLocatorApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF000000),
-        primaryColor: const Color(0xFF047a39),
+        primaryColor: const Color(0xFF037d3a),
         colorScheme: ColorScheme.dark(
-          primary: Color(0xFF047a39),
+          primary: Color(0xFF037d3a),
           secondary: Color(0xFF1a1a1a),
           surface: Color(0xFF1a1a1a),
         ),
@@ -51,11 +51,11 @@ class UniLocatorApp extends StatelessWidget {
           backgroundColor: const Color(0xFF000000),
           elevation: 2,
           titleTextStyle: TextStyle(
-            color: Color(0xFF047a39),
+            color: Color(0xFF037d3a),
             fontWeight: FontWeight.bold,
             fontSize: 22,
           ),
-          iconTheme: IconThemeData(color: Color(0xFF047a39)),
+          iconTheme: IconThemeData(color: Color(0xFF037d3a)),
         ),
         cardColor: const Color(0xFF1a1a1a),
         textTheme: const TextTheme(
@@ -69,7 +69,7 @@ class UniLocatorApp extends StatelessWidget {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFF047a39),
+            backgroundColor: Color(0xFF037d3a),
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -90,7 +90,7 @@ class UniLocatorApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Color(0xFF047a39)),
+            borderSide: BorderSide(color: Color(0xFF037d3a)),
           ),
           labelStyle: TextStyle(color: Color(0xFF888888)),
         ),
@@ -209,7 +209,7 @@ class PersistentLogPanel extends StatelessWidget {
                   decoration: const BoxDecoration(
                     color: Color(0xFF111111),
                     border: Border(
-                      bottom: BorderSide(color: Color(0xFF047a39), width: 1),
+                      bottom: BorderSide(color: Color(0xFF037d3a), width: 1),
                     ),
                   ),
                   child: Row(
@@ -219,14 +219,14 @@ class PersistentLogPanel extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.terminal,
-                            color: Color(0xFF047a39),
+                            color: Color(0xFF037d3a),
                             size: 14,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             'App Logs',
                             style: TextStyle(
-                              color: Color(0xFF047a39),
+                              color: Color(0xFF037d3a),
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                               letterSpacing: 0.5,
@@ -254,7 +254,7 @@ class PersistentLogPanel extends StatelessWidget {
                                 SnackBar(
                                   content: Text('Logs copied to clipboard!'),
                                   duration: Duration(seconds: 1),
-                                  backgroundColor: Color(0xFF047a39),
+                                  backgroundColor: Color(0xFF037d3a),
                                 ),
                               );
                               logger.log(
@@ -270,13 +270,13 @@ class PersistentLogPanel extends StatelessWidget {
                               color: const Color(0xFF1a1a1a),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
-                                color: const Color(0xFF047a39),
+                                color: const Color(0xFF037d3a),
                                 width: 0.5,
                               ),
                               boxShadow: [
                                 BoxShadow(
                                   color: Color(
-                                    0xFF047a39,
+                                    0xFF037d3a,
                                   ).withValues(alpha: 0.3),
                                   blurRadius: 2,
                                   spreadRadius: 0,
