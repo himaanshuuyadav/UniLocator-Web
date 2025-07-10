@@ -1,129 +1,121 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Toggle active state for nav items
-    const navItems = document.querySelectorAll('.nav-links li');
-    navItems.forEach(item => {
-        item.addEventListener('click', function() {
-            navItems.forEach(i => i.classList.remove('active'));
-            this.classList.add('active');
-        });
+    console.log('Dashboard script loading...');
+
+    // Initialize Socket.IO with proper configuration
+    const socket = io({
+        transports: ['polling', 'websocket'],
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000
     });
 
-    // Simulate real-time updates (for demo purposes)
-    setInterval(() => {
-        updateRandomStats();
-        addRandomActivity();
-    }, 5000);
-    
-    // Feature tabs functionality
-    initFeatureTabs();
-});
+    // Connection event handlers
+    socket.on('connect', () => {
+        console.log('Successfully connected to server');
+        document.dispatchEvent(new CustomEvent('socketConnected'));
+    });
 
-function updateRandomStats() {
-    const numbers = document.querySelectorAll('.stat-number');
-    const randomIndex = Math.floor(Math.random() * numbers.length);
-    const randomChange = Math.floor(Math.random() * 5) + 1;
-    
-    const currentNumber = parseInt(numbers[randomIndex].textContent);
-    numbers[randomIndex].textContent = currentNumber + randomChange;
-}
+    socket.on('server_status', (data) => {
+        console.log('Server status:', data);
+    });
 
-function addRandomActivity() {
-    const activities = [
-        'Device "iPhone 13" updated location',
-        'Low battery alert: "Galaxy A03"',
-        'New device connected',
-        'Location history updated'
-    ];
+    socket.on('device_connected', (data) => {
+        console.log('New device connected:', data);
+        addDeviceToUI(data);
+    });
 
-    const activityList = document.querySelector('.activity-list');
-    if (activityList) {
-        const randomActivity = activities[Math.floor(Math.random() * activities.length)];
-        
-        const newActivity = document.createElement('div');
-        newActivity.className = 'activity-item';
-        newActivity.innerHTML = `
-            <i class="fas fa-location-dot"></i>
-            <div class="activity-details">
-                <p>${randomActivity}</p>
-                <span>Just now</span>
+    socket.on('connect_error', (error) => {
+        console.error('Connection error:', error);
+    });
+
+    function addDeviceToUI(device) {
+        const devicesGrid = document.querySelector('.devices-grid');
+        if (!devicesGrid) return;
+
+        const deviceCard = document.createElement('div');
+        deviceCard.className = 'device-card';
+        deviceCard.dataset.deviceId = device.id;
+        deviceCard.innerHTML = `
+            <div class="device-header">
+                <h3>${device.device_name}</h3>
+                <span class="device-status">Connected</span>
+            </div>
+            <div class="device-info">
+                <p><i class="fas fa-qrcode"></i> ID: ${device.device_code}</p>
+                <p><i class="fas fa-clock"></i> Added: Just now</p>
+            </div>
+            <div class="device-actions">
+                <button class="device-menu-btn"><i class="fas fa-ellipsis-v"></i></button>
+                <div class="device-menu-dropdown">
+                    <button class="remove-device-btn" data-device-code="${device.device_code}">Remove Device</button>
+                </div>
             </div>
         `;
+        devicesGrid.appendChild(deviceCard);
+    }
 
-        activityList.insertBefore(newActivity, activityList.firstChild);
-        
-        // Remove oldest activity if more than 5
-        if (activityList.children.length > 5) {
-            activityList.removeChild(activityList.lastChild);
+    // Listen for new devices
+    socket.on('device_added', function(device) {
+        console.log('New device added:', device);
+        addDeviceToUI(device);
+    });
+
+    // Device 3-dot menu functionality
+    const deviceCards = document.querySelectorAll('.device-card');
+    deviceCards.forEach(card => {
+        const menuBtn = card.querySelector('.device-menu-btn');
+        const menuDropdown = card.querySelector('.device-menu-dropdown');
+        if (menuBtn && menuDropdown) {
+            menuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // Close all other open menus
+                document.querySelectorAll('.device-actions.open').forEach(el => {
+                    if (el !== menuBtn.parentElement) el.classList.remove('open');
+                });
+                menuBtn.parentElement.classList.toggle('open');
+            });
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!card.contains(e.target)) {
+                    menuBtn.parentElement.classList.remove('open');
+                }
+            });
         }
-    }
-}
+    });
 
-// Feature tabs functionality
-function initFeatureTabs() {
-    console.log("Initializing feature tabs...");
-    const featureTabs = document.querySelectorAll('.feature-tab');
-    if (!featureTabs.length) {
-        console.log("No feature tabs found");
-        return; // Exit if no feature tabs exist on the page
-    }
-    
-    console.log(`Found ${featureTabs.length} feature tabs`);
-    const featureContents = document.querySelectorAll('.feature-image-container');
-
-    function activateTab(tabElement) {
-        const tabId = tabElement.getAttribute('data-tab');
-        console.log(`Activating tab: ${tabId}`);
-        
-        // Remove active class from all tabs and contents
-        featureTabs.forEach(t => t.classList.remove('active'));
-        featureContents.forEach(c => c.classList.remove('active'));
-        
-        // Add active class to clicked tab and corresponding content
-        tabElement.classList.add('active');
-        const contentElement = document.getElementById(`${tabId}-content`);
-        if (contentElement) {
-            contentElement.classList.add('active');
-        } else {
-            console.log(`Content element for tab ${tabId} not found`);
-        }
-    }
-
-    featureTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            activateTab(this);
+    // Remove device functionality
+    const removeDeviceBtns = document.querySelectorAll('.remove-device-btn');
+    removeDeviceBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const deviceCode = this.getAttribute('data-device-code');
+            if (confirm('Are you sure you want to remove this device?')) {
+                fetch('/devices/remove-device', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ device_code: deviceCode })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.closest('.device-card').remove();
+                        alert('Device removed successfully!');
+                    } else {
+                        alert('Failed to remove device: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Error removing device. Please try again.');
+                    console.error(error);
+                });
+            }
+            // Close the menu after action
+            this.closest('.device-actions').classList.remove('open');
         });
     });
-    
-    // Auto-rotate through features every 5 seconds
-    let currentFeatureIndex = 0;
-    
-    // Start rotation immediately
-    console.log("Starting feature rotation");
-    const startRotation = () => {
-        return window.setInterval(() => {
-            currentFeatureIndex = (currentFeatureIndex + 1) % featureTabs.length;
-            console.log(`Auto-rotating to feature index: ${currentFeatureIndex}`);
-            activateTab(featureTabs[currentFeatureIndex]);
-        }, 5000);
-    };
-    
-    let featureRotateInterval = startRotation();
-    
-    // Pause rotation when user interacts with tabs
-    featureTabs.forEach(tab => {
-        tab.addEventListener('mouseenter', () => {
-            console.log("Mouse entered tab, clearing rotation interval");
-            window.clearInterval(featureRotateInterval);
-        });
-    });
-    
-    // Resume rotation when mouse leaves the features section
-    const featuresSection = document.querySelector('.features-section');
-    if (featuresSection) {
-        featuresSection.addEventListener('mouseleave', () => {
-            console.log("Mouse left features section, restarting rotation");
-            window.clearInterval(featureRotateInterval);
-            featureRotateInterval = startRotation();
-        });
-    }
-}
+
+    console.log('Dashboard script initialized');
+});
