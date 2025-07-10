@@ -6,28 +6,88 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
+    // GitHub APK download URL (replace with actual GitHub releases URL)
+    const GITHUB_APK_URL = 'https://github.com/himaanshuuyadav/unilocator/releases/';
+
+    // Add event listeners for all "Add Device" buttons
+    const addDeviceBtns = document.querySelectorAll('.add-device-btn');
+    addDeviceBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            console.log('Add device button clicked');
+            modal.classList.add('show');
+            resetSteps();
+            generateGitHubQrCode();
+        });
+    });
+
     const closeBtn = modal.querySelector('.close');
     const nextBtn = modal.querySelector('.btn-next');
     const prevBtn = modal.querySelector('.btn-previous');
-    const methodBtns = modal.querySelectorAll('.method-btn');
+    const methodBtns = modal.querySelectorAll('.connection-method-btn');
+    
+    // GitHub QR Code elements
+    const showDirectDownloadBtn = modal.querySelector('#showDirectDownload');
+    const showQrAgainBtn = modal.querySelector('#showQrAgain');
+    const githubQrContainer = modal.querySelector('#githubQrContainer');
+    const directDownloadContainer = modal.querySelector('#directDownloadContainer');
+    const directDownloadBtn = modal.querySelector('#directDownloadBtn');
+    
+    console.log('Modal elements found:', {
+        closeBtn: !!closeBtn,
+        nextBtn: !!nextBtn,
+        prevBtn: !!prevBtn,
+        methodBtns: methodBtns.length,
+        showDirectDownloadBtn: !!showDirectDownloadBtn,
+        showQrAgainBtn: !!showQrAgainBtn
+    });
     
     let currentStep = 1;
     const totalSteps = 3;
 
     // Add event listeners only if elements exist
     if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-            resetSteps();
+        closeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeModal();
+        });
+    }
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Prevent modal from closing when clicking inside modal content
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.addEventListener('click', (e) => {
+            e.stopPropagation();
         });
     }
 
     if (nextBtn) {
         nextBtn.addEventListener('click', () => {
             if (currentStep < totalSteps) {
+                // On step 2, only allow if a method is selected
+                if (currentStep === 2) {
+                    const selectedMethodBtn = modal.querySelector('.connection-method-btn.active');
+                    if (!selectedMethodBtn) return;
+                }
                 currentStep++;
                 showStep(currentStep);
-            }
+                // If moving to step 3, generate code/QR for selected method
+                if (currentStep === 3) {
+                    const selectedMethodBtn = modal.querySelector('.connection-method-btn.active');
+                    if (selectedMethodBtn) {
+                        const method = selectedMethodBtn.dataset.method;
+                        generateUniqueCode(method);
+                    }
+                }                } else if (currentStep === totalSteps) {
+                    closeModal();
+                }
         });
     }
 
@@ -51,73 +111,275 @@ document.addEventListener('DOMContentLoaded', function() {
             const codeMethod = modal.querySelector('.code-method');
             
             if (method === 'qr') {
-                qrMethod.classList.remove('hidden');
-                codeMethod.classList.add('hidden');
-            } else {
-                qrMethod.classList.add('hidden');
-                codeMethod.classList.remove('hidden');
+                if (qrMethod) qrMethod.classList.remove('hidden');
+                if (codeMethod) codeMethod.classList.add('hidden');
+            } else if (method === 'code') {
+                if (qrMethod) qrMethod.classList.add('hidden');
+                if (codeMethod) codeMethod.classList.remove('hidden');
             }
+            
+            // Enable Next button if on step 2
+            if (currentStep === 2 && nextBtn) nextBtn.disabled = false;
         });
     });
 
+    // GitHub QR Code and Download Toggle Event Handlers
+    if (showDirectDownloadBtn) {
+        showDirectDownloadBtn.addEventListener('click', () => {
+            toggleToDirectDownload();
+        });
+    }
+
+    if (showQrAgainBtn) {
+        showQrAgainBtn.addEventListener('click', () => {
+            toggleToQrCode();
+        });
+    }
+
+    if (directDownloadBtn) {
+        directDownloadBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            downloadApkFile();
+        });
+    }
+
+    function generateUniqueCode(method) {
+        console.log('Generating code for method:', method);
+
+        // Show loading state in the correct modal container
+        if (method === 'qr') {
+            const qrCodeEl = document.getElementById('qrCode');
+            if (qrCodeEl) qrCodeEl.innerHTML = '<div class="loading">Generating QR code...</div>';
+        } else {
+            const connectionCodeEl = document.getElementById('connectionCode');
+            if (connectionCodeEl) connectionCodeEl.innerHTML = '<div class="loading">Generating code...</div>';
+        }
+
+        fetch('/devices/generate-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                if (method === 'qr') {
+                    const qrCodeEl = document.getElementById('qrCode');
+                    if (qrCodeEl) {
+                        qrCodeEl.innerHTML = `<img src="${data.qr_code}" alt="QR Code" class="qr-code">`;
+                    }
+                } else {
+                    const connectionCodeEl = document.getElementById('connectionCode');
+                    if (connectionCodeEl) {
+                        connectionCodeEl.innerHTML = `<div class="connection-code">${data.code}</div>`;
+                    }
+                }
+            } else {
+                throw new Error(data.error || 'Failed to generate code');
+            }
+        })
+        .catch(error => {
+            console.error('Error generating code:', error);
+            if (method === 'qr') {
+                const qrCodeEl = document.getElementById('qrCode');
+                if (qrCodeEl) {
+                    qrCodeEl.innerHTML = `<div class="error-message">Error generating QR code.<br><small>${error.message}</small></div>`;
+                }
+            } else {
+                const connectionCodeEl = document.getElementById('connectionCode');
+                if (connectionCodeEl) {
+                    connectionCodeEl.innerHTML = `<div class="error-message">Error generating code.<br><small>${error.message}</small></div>`;
+                }
+            }
+        });
+    }
+
     function showStep(step) {
         const steps = modal.querySelectorAll('.step');
+        
+        // Simply hide all steps and show the current one
         steps.forEach((s, index) => {
-            s.classList.toggle('active', index + 1 === step);
+            s.classList.remove('active');
+            if (index === step - 1) {
+                s.classList.add('active');
+            }
         });
         
-        prevBtn.disabled = step === 1;
-        nextBtn.innerHTML = step === totalSteps ? 
-            'Finish <i class="fas fa-check"></i>' : 
-            'Next <i class="fas fa-arrow-right"></i>';
+        // Update button states
+        if (prevBtn) prevBtn.disabled = step === 1;
+        
+        if (nextBtn) {
+            if (step === 2) {
+                const selectedMethod = modal.querySelector('.connection-method-btn.active');
+                nextBtn.disabled = !selectedMethod;
+            } else {
+                nextBtn.disabled = false;
+            }
+            
+            nextBtn.innerHTML = step === totalSteps ? 
+                'Close <i class="fas fa-times"></i>' : 
+                'Next <i class="fas fa-arrow-right"></i>';
+        }
+    }
+
+    function closeModal() {
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        setTimeout(() => {
+            resetSteps();
+        }, 50);
     }
 
     function resetSteps() {
         currentStep = 1;
-        showStep(1);
-    }
-
-    function handleFinishStep() {
-        fetch('/devices/add', {  // Updated endpoint
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                device_code: document.getElementById('device-code').value,
-                device_name: document.getElementById('device-name').value
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log('Device added successfully:', data.device);
-                // Close the modal
-                const modal = document.querySelector('.modal');
-                if (modal) {
-                    modal.style.display = 'none';
-                }
-                // Reset the form
-                document.getElementById('add-device-form').reset();
-                // Refresh the devices list
-                window.location.reload();
-            } else {
-                console.error('Error adding device:', data.error);
-                alert('Error adding device: ' + data.error);
+        
+        // Reset all steps - use simple visibility toggle
+        const steps = modal.querySelectorAll('.step');
+        steps.forEach((step, index) => {
+            step.classList.remove('active');
+            if (index === 0) {
+                step.classList.add('active');
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error adding device. Please try again.');
         });
+        
+        // Clear method selections
+        methodBtns.forEach(btn => btn.classList.remove('active'));
+        
+        // Hide method content
+        const qrMethod = modal.querySelector('.qr-method');
+        const codeMethod = modal.querySelector('.code-method');
+        if (qrMethod) qrMethod.classList.add('hidden');
+        if (codeMethod) codeMethod.classList.add('hidden');
+        
+        // Clear generated content
+        const qrCodeEl = document.getElementById('qrCode');
+        const connectionCodeEl = document.getElementById('connectionCode');
+        if (qrCodeEl) qrCodeEl.innerHTML = '';
+        if (connectionCodeEl) connectionCodeEl.innerHTML = '';
+        
+        // Reset GitHub QR/Download view
+        if (githubQrContainer && directDownloadContainer) {
+            directDownloadContainer.style.display = 'none';
+            directDownloadContainer.classList.add('hidden');
+            directDownloadContainer.classList.remove('show');
+            githubQrContainer.style.display = 'block';
+            githubQrContainer.classList.remove('fade-out');
+        }
+        
+        // Reset button states
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) {
+            nextBtn.disabled = false;
+            nextBtn.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
+        }
     }
 
-    // Update the finish button event listener
-    const finishButton = document.querySelector('.finish-btn');
-    if (finishButton) {
-        finishButton.addEventListener('click', handleFinishStep);
+
+    // GitHub QR Code Generation
+    function generateGitHubQrCode() {
+        const qrCodeContainer = document.getElementById('githubQrCode');
+        if (!qrCodeContainer) return;
+
+        // Show loading state
+        qrCodeContainer.innerHTML = '<div class="loading">Generating QR code...</div>';
+
+        // Generate QR code for GitHub APK download URL
+        // Using QR.js library or API - you can replace this with your preferred QR code generator
+        const qrCodeDataUrl = generateQrCodeDataUrl(GITHUB_APK_URL);
+        
+        setTimeout(() => {
+            qrCodeContainer.innerHTML = `<img src="${qrCodeDataUrl}" alt="Download APK QR Code" />`;
+        }, 1000);
     }
-    
+
+    // Simple QR code data URL generator (placeholder - replace with actual QR library)
+    function generateQrCodeDataUrl(text) {
+        // This is a placeholder using qr-server.com API
+        // In production, you should use a local QR code library like qrcode.js
+        return `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(text)}&bgcolor=ffffff&color=037d3a&margin=20`;
+    }
+
+    // Toggle to direct download view
+    function toggleToDirectDownload() {
+        if (!githubQrContainer || !directDownloadContainer) return;
+
+        // Add fade out class to QR container
+        githubQrContainer.classList.add('fade-out');
+        
+        setTimeout(() => {
+            githubQrContainer.style.display = 'none';
+            directDownloadContainer.style.display = 'block';
+            directDownloadContainer.classList.remove('hidden');
+            
+            // Trigger the fade in animation
+            setTimeout(() => {
+                directDownloadContainer.classList.add('show');
+            }, 50);
+        }, 400);
+    }
+
+    // Toggle back to QR code view
+    function toggleToQrCode() {
+        if (!githubQrContainer || !directDownloadContainer) return;
+
+        // Add fade out class to direct download container
+        directDownloadContainer.classList.remove('show');
+        
+        setTimeout(() => {
+            directDownloadContainer.style.display = 'none';
+            directDownloadContainer.classList.add('hidden');
+            githubQrContainer.style.display = 'block';
+            
+            // Trigger the fade in animation
+            setTimeout(() => {
+                githubQrContainer.classList.remove('fade-out');
+            }, 50);
+        }, 400);
+    }
+
+    // Download APK file
+    function downloadApkFile() {
+        // Update button text and show loading state
+        const downloadBtn = directDownloadBtn;
+        const originalText = downloadBtn.innerHTML;
+        
+        downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+        downloadBtn.style.pointerEvents = 'none';
+        
+        // Create a temporary link element to trigger download
+        const link = document.createElement('a');
+        link.href = GITHUB_APK_URL;
+        link.download = 'UniLocator.apk';
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Reset button after 3 seconds
+        setTimeout(() => {
+            downloadBtn.innerHTML = originalText;
+            downloadBtn.style.pointerEvents = 'auto';
+        }, 3000);
+    }
+
+    // Close modal when pressing escape
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal.classList.contains('show')) {
+            closeModal();
+        }
+    });
+
     // For debugging
     console.log('Add device script initialized');
+    console.log('Modal found:', modal ? 'Yes' : 'No');
+    console.log('Add device buttons found:', document.querySelectorAll('.add-device-btn').length);
 });
