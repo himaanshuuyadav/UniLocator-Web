@@ -18,11 +18,13 @@ from flask import request, jsonify
 bp = Blueprint('devices', __name__, url_prefix='/devices')
 # socketio = SocketIO()
 
-  # Removed login_required decorator (no longer needed)
+@bp.route('/generate-code', methods=['POST'])
 def generate_code():
+    from flask import session
+    
     try:
-        # Expect Firebase UID from frontend (e.g., header 'X-User-UID')
-        firebase_uid = request.headers.get('X-User-UID')
+        # Use session authentication instead of headers
+        firebase_uid = session.get('user_id')
         if not firebase_uid:
             return jsonify({'success': False, 'error': 'Not authenticated'}), 401
         # Generate unique 8-character code
@@ -222,3 +224,87 @@ def list_devices():
             "last_seen": device["last_seen"]
         })
     return jsonify(result)
+
+@bp.route('/add', methods=['POST'])
+def add_device():
+    from flask import session
+    
+    # Check session authentication
+    firebase_uid = session.get('user_id')
+    if not firebase_uid:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    try:
+        data = request.get_json()
+        device_code = data.get('device_code')
+        device_name = data.get('device_name', f"Device_{device_code[:6]}" if device_code else "New Device")
+        
+        if not device_code:
+            return jsonify({'success': False, 'error': 'Device code is required'}), 400
+        
+        logging.info(f"[ADD_DEVICE] Adding device {device_code} for user {firebase_uid}")
+        
+        db = get_db()
+        
+        # Check if device code already exists in connected_devices
+        cursor = db.execute('SELECT device_code FROM connected_devices WHERE device_code = ?', (device_code,))
+        if cursor.fetchone():
+            return jsonify({'success': False, 'error': 'Device already connected'}), 400
+        
+        # Add device to connected_devices directly
+        db.execute('''
+            INSERT INTO connected_devices (user_id, device_code, device_name, connected_at) 
+            VALUES (?, ?, ?, datetime('now'))
+        ''', (firebase_uid, device_code, device_name))
+        db.commit()
+        
+        logging.info(f"[ADD_DEVICE] Device {device_code} added successfully for user {firebase_uid}")
+        
+        # Emit socket event for real-time update
+        socketio.emit('device_connected', {
+            'device_code': device_code,
+            'device_name': device_name,
+            'user_id': firebase_uid
+        })
+        
+        return jsonify({
+            'success': True,
+            'message': 'Device added successfully',
+            'device': {
+                'code': device_code,
+                'name': device_name
+            }
+        })
+        
+    except Exception as e:
+        logging.error(f"[ADD_DEVICE] Error adding device: {e}")
+        return jsonify({'success': False, 'error': 'Failed to add device'}), 500
+
+@bp.route('/disconnect-all', methods=['POST'])
+def disconnect_all_devices():
+    from flask import session
+    import sqlite3
+    
+    try:
+        firebase_uid = session.get('user_id')
+        if not firebase_uid:
+            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+        
+        conn = sqlite3.connect('instance/unilocator.db')
+        cursor = conn.cursor()
+        
+        # Delete all devices for the user
+        cursor.execute("DELETE FROM connected_devices WHERE user_id = ?", (firebase_uid,))
+        deleted_count = cursor.rowcount
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Disconnected {deleted_count} device(s) successfully'
+        })
+        
+    except Exception as e:
+        print(f"[DEBUG] Error disconnecting all devices: {e}")
+        return jsonify({'success': False, 'error': 'Failed to disconnect devices'}), 500
