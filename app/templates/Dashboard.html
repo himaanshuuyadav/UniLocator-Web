@@ -3,78 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UniLocator - Track Your Devices</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>UniLocator - Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/add_device.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <nav>
-        <div class="logo">UniLocator</div>
-        <div class="nav-buttons">
-            <a href="/firebase_auth/web/login.html" class="btn btn-login">Log in</a>
-            <a href="/firebase_auth/web/register.html" class="btn btn-signup">Sign up</a>
+        <div class="nav-content">
+            <div class="logo">UniLocator</div>
+            <div class="nav-actions">
+                <a href="{{ url_for('main.profile') }}" class="profile-btn">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
         </div>
     </nav>
 
     <main>
-        <div id="particles-js"></div>
-        <div class="hero">
-            <span class="tag">✨ Introducing UniLocator - The Ultimate Device Tracker</span>
-            <h1>UniLocator is the new way<br>to track your devices.</h1>
-            <p class="subtitle">
-                Seamlessly monitor and locate your devices in real-time with our powerful tracking solution.
-                Built with advanced technology for reliable device management.
-            </p>
-            <a href="/firebase_auth/web/register.html" class="btn btn-cta">Get Started for free →</a>
-        </div>
-
-        <div class="features-section">
-            <h2 class="features-title">Features</h2>
-            <div class="features-headline">
-                <h1>Blazingly fast to help your<br>devices stay connected</h1>
-            </div>
-            
-            <div class="features-container">
-                <div class="features-tabs">
-                    <div class="feature-tab active" data-tab="tab1">
-                        <h3>Real-time Tracking</h3>
-                        <div class="tab-description">Monitor your devices' locations with precision and accuracy in real-time.</div>
+        <div class="content">
+            {% if devices %}
+                <div class="devices-section">
+                    <div class="devices-section-header">
+                        <h2>My Devices</h2>
+                        <button class="add-device-btn" type="button">
+                            <i class="fas fa-plus"></i> Add New Device
+                        </button>
                     </div>
-                    <div class="feature-tab" data-tab="tab2">
-                        <h3>Battery Monitoring</h3>
-                        <div class="tab-description">Keep track of device battery levels and get low battery alerts.</div>
-                    </div>
-                    <div class="feature-tab" data-tab="tab3">
-                        <h3>Location History</h3>
-                        <div class="tab-description">Access detailed history of device movements and patterns.</div>
-                    </div>
-                    <div class="feature-tab" data-tab="tab4">
-                        <h3>Continuous Improvement</h3>
-                        <div class="tab-description">Our platform is constantly improving with new features and performance enhancements.</div>
+                    <div class="devices-grid">
+                        {% for device in devices %}
+                            <div class="device-card">
+                                <div class="device-header">
+                                    <h3>{{ device.name or device.device_name or 'Unknown Device' }}</h3>
+                                    <span class="device-status">Connected</span>
+                                    <div class="device-actions">
+                                        <button class="device-menu-btn" aria-label="Device actions">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <div class="device-menu-dropdown hidden">
+                                            <button class="remove-device-btn" data-device-code="{{ device.code }}">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="device-info">
+                                    <p><i class="fas fa-qrcode"></i> ID: {{ device.code or device.device_code }}</p>
+                                    <p><i class="fas fa-clock"></i> Connected: {{ device.connected_at }}</p>
+                                    <p><i class="fas fa-map-marker-alt"></i>
+                                        {% if device.location and (device.location.lat != 0 or device.location.lng != 0) %}
+                                            Location: {{ device.location.lat }}, {{ device.location.lng }}
+                                        {% elif device.last_latitude is defined and device.last_longitude is defined and (device.last_latitude or device.last_longitude) %}
+                                            Location: {{ device.last_latitude }}, {{ device.last_longitude }}
+                                        {% else %}
+                                            Waiting for location...
+                                        {% endif %}
+                                    </p>
+                                    <p><i class="fas fa-battery-half"></i> Battery: {{ device.last_battery if device.last_battery is defined else 'Unknown' }}%</p>
+                                    <p><i class="fas fa-wifi"></i> Network: {{ device.last_network if device.last_network is defined else 'Unknown' }}</p>
+                                    
+                                    <a href="{{ url_for('main.show_map', device_id=device.code) }}" class="btn-map" target="_blank">
+                                        <i class="fas fa-map"></i> Track
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
-                <div class="features-content">
-                    <div class="feature-image-container active" id="tab1-content">
-                        <img src="{{ url_for('static', filename='img/features/feature-tracking.jpg') }}" alt="Real-time Tracking" class="feature-image" onerror="this.src='https://images.unsplash.com/photo-1596526131083-e8c633c948d2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8dGVjaG5vbG9neXx8fHx8fDE2MTI5MzYyMDc&ixlib=rb-1.2.1&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1080'">
-                    </div>
-                    <div class="feature-image-container" id="tab2-content">
-                        <img src="{{ url_for('static', filename='img/features/feature-battery.jpg') }}" alt="Battery Monitoring" class="feature-image" onerror="this.src='https://images.unsplash.com/photo-1606229365485-93a3b8ee0385?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8YmF0dGVyeXx8fHx8fDE2MTI5MzYyNjA&ixlib=rb-1.2.1&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1080'">
-                    </div>
-                    <div class="feature-image-container" id="tab3-content">
-                        <img src="{{ url_for('static', filename='img/features/feature-history.jpg') }}" alt="Location History" class="feature-image" onerror="this.src='https://images.unsplash.com/photo-1521295121783-8a321d551ad2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8bWFwfHx8fHx8MTYxMjkzNjMwNw&ixlib=rb-1.2.1&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1080'">
-                    </div>
-                    <div class="feature-image-container" id="tab4-content">
-                        <img src="{{ url_for('static', filename='img/features/feature-improvement.jpg') }}" alt="Continuous Improvement" class="feature-image" onerror="this.src='https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxfDB8MXxyYW5kb218MHx8dGVjaHx8fHx8fDE2MTI5MzYzNDI&ixlib=rb-1.2.1&q=80&utm_campaign=api-credit&utm_medium=referral&utm_source=unsplash_source&w=1080'">
-                    </div>
+            {% else %}
+                <div class="welcome-section">
+                    <h2>Welcome to UniLocator</h2>
+                    <p>No devices connected yet. Click below to add your first device.</p>
+                    <button class="add-device-btn" type="button">
+                        <i class="fas fa-plus"></i> Add New Device
+                    </button>
                 </div>
-            </div>
+            {% endif %}
         </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-    <script src="{{ url_for('static', filename='js/particles-config.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/Dashboard.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <!-- Add Device Modal -->
+    <div id="addDeviceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Device</h2>
+                <span class="close">&times;</span>
+            </div>
+            <!-- <hr class="modal-divider"> -->
+            <div class="modal-body">
+                <div class="steps">
+                    <div class="step step-1 active">
+                        <h3>Download UniLocator App</h3>
+                        <div class="app-download">
+                            <p>Scan the QR code to download the UniLocator app from GitHub:</p>
+                            
+                            <!-- QR Code Container -->
+                            <div id="githubQrContainer" class="github-qr-container">
+                                <div class="qr-wrapper">
+                                    <div id="githubQrCode" class="github-qr-code">
+                                        <!-- QR code will be generated here -->
+                                    </div>
+                                </div>
+                                <p class="qr-description">Scan with your phone's camera to download the APK</p>
+                                <button id="showDirectDownload" class="direct-download-toggle">
+                                    <i class="fas fa-download"></i>
+                                    Download APK Here
+                                </button>
+                            </div>
+                            
+                            <!-- Direct Download Container (Hidden initially) -->
+                            <div id="directDownloadContainer" class="direct-download-container hidden">
+                                <p>Download the APK directly to this device:</p>
+                                <a href="#" id="directDownloadBtn" class="direct-download-btn">
+                                    <i class="fab fa-android"></i>
+                                    Download UniLocator APK
+                                </a>
+                                <button id="showQrAgain" class="show-qr-toggle">
+                                    <i class="fas fa-qrcode"></i>
+                                    Show QR Code Again
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step step-2">
+                        <h3>Choose Connection Method</h3>
+                        <div class="connection-methods">
+                            <button class="connection-method-btn" data-method="qr">
+                                <i class="fas fa-qrcode"></i>
+                                <span>Connect via QR Code</span>
+                                <small>Scan QR code with your device</small>
+                            </button>
+                            <button class="connection-method-btn" data-method="code">
+                                <i class="fas fa-keyboard"></i>
+                                <span>Connect via Code</span>
+                                <small>Enter unique code manually</small>
+                            </button>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="step step-3">
+                        <h3>Connect Your Device</h3>
+                        <div class="connection-result">
+                            <div class="qr-method hidden">
+                                <div class="connection-qr-container">
+                                    <div id="qrCode" class="connection-qr-code"></div>
+                                </div>
+                                <p class="connection-description">Scan this QR code using the UniLocator app</p>
+                            </div>
+                            <div class="code-method hidden">
+                                <div class="connection-code-container">
+                                    <div id="connectionCode" class="connection-unique-code"></div>
+                                </div>
+                                <p class="connection-description">Enter this code in your UniLocator app</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn-previous" disabled>
+                        <i class="fas fa-arrow-left"></i> Previous
+                    </button>
+                    <button class="btn-next" id="step2Next" disabled>
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3 Content -->
+    <div id="step3Content" class="step-content">
+        <!-- Content will be dynamically inserted here -->
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename='js/add_device.js') }}"></script>
+
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <!-- Firebase Auth -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <!-- Firebase Config and Auth Service -->
+    <script src="/firebase_auth/web/firebase-config-cdn.js"></script>
+    <script src="/firebase_auth/web/auth-service-cdn.js"></script>
+    
+    <script>
+        // Firebase is loaded but we don't need to show username in navbar anymore
+        // The profile page will handle user authentication display
+    </script>
 </body>
 </html>
