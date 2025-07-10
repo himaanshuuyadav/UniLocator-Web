@@ -20,11 +20,18 @@ def create_app():
     app.config['JWT_SECRET_KEY'] = 'your-very-secret-key'  # Use a strong secret!
     jwt = JWTManager(app)
     
+    # Set secret key and session cookie settings
+    app.config['SECRET_KEY'] = Config.SECRET_KEY
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['SESSION_COOKIE_SECURE'] = False  # Set to True if using HTTPS
+    
     # Register blueprints
-    from .routes import devices, main, api
+    from .routes import devices, main, api, auth
     app.register_blueprint(devices.bp, url_prefix='/devices')
     app.register_blueprint(main.bp)
     app.register_blueprint(api.bp)
+    app.register_blueprint(auth.bp)
     
     # Serve Firebase web auth static files
     import os
