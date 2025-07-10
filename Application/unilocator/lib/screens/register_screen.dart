@@ -82,7 +82,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(Icons.person_add, size: 72, color: Color(0xFF047a39)),
+                Icon(Icons.person_add, size: 72, color: Color(0xFF037d3a)),
                 const SizedBox(height: 24),
                 Text(
                   'Create your UniLocator account',
@@ -90,7 +90,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF047a39),
+                    color: Color(0xFF037d3a),
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -145,7 +145,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: _loading
                       ? Center(
                           child: CircularProgressIndicator(
-                            color: Color(0xFF047a39),
+                            color: Color(0xFF037d3a),
                           ),
                         )
                       : ElevatedButton(
