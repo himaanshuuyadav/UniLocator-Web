@@ -44,7 +44,7 @@ class SplashScreen extends StatelessWidget {
                       Icon(
                         Icons.location_on,
                         size: 80,
-                        color: Color(0xFF047a39),
+                        color: Color(0xFF037d3a),
                       ),
                       const SizedBox(height: 24),
                       Text(
@@ -52,11 +52,11 @@ class SplashScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF047a39),
+                          color: Color(0xFF037d3a),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      CircularProgressIndicator(color: Color(0xFF047a39)),
+                      CircularProgressIndicator(color: Color(0xFF037d3a)),
                     ],
                   ),
                 ),
