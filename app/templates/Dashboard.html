@@ -4,84 +4,475 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UniLocator - Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Dashboard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/add_device.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <nav>
-        <div class="nav-content">
-            <div class="logo">UniLocator</div>
-            <div class="nav-actions">
-                <a href="{{ url_for('main.profile') }}" class="profile-btn">
-                    <i class="fas fa-user-circle"></i>
-                    <span>Profile</span>
-                </a>
+    <!-- Mobile Sidebar Toggle -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-location-pin"></i>
+                <span class="sidebar-logo-text">UniLocator</span>
             </div>
+            <button class="sidebar-toggle" id="sidebarClose">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-    </nav>
 
-    <main>
-        <div class="content">
-            {% if devices %}
-                <div class="devices-section">
-                    <div class="devices-section-header">
-                        <h2>My Devices</h2>
-                        <button class="add-device-btn" type="button">
-                            <i class="fas fa-plus"></i> Add New Device
-                        </button>
+        <nav class="sidebar-nav">
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active">
+                    <a href="#" class="sidebar-link" data-page="devices">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Devices</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link" data-page="map">
+                        <i class="fas fa-map"></i>
+                        <span>Live Map</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link" data-page="friends">
+                        <i class="fas fa-users"></i>
+                        <span>Friends</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link" data-page="security">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Security Advisor</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link" data-page="profile">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link" data-page="settings">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- <div class="sidebar-footer">
+            <div class="upgrade-card">
+                <div class="upgrade-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h4>Upgrade to Pro</h4>
+                <p>Unlock advanced features and unlimited devices</p>
+                <button class="upgrade-btn">
+                    <i class="fas fa-arrow-up"></i>
+                    Upgrade Now
+                </button>
+            </div>
+        </div> -->
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="header-right">
+                <span class="user-name" id="navbar-username"></span>
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Devices Section (shown when Devices is active) -->
+                <div id="devices-page" class="page-content active">
+                    <h1 class="page-title">Devices</h1>
+                    <div class="page-content-inner">
+                    {% if devices %}
+                        <div class="devices-section">
+                            <div class="devices-section-header">
+                                <div class="section-title">
+                                    <h2>Connected Devices</h2>
+                                    <span class="device-count">{{ devices|length }} device{{ 's' if devices|length != 1 else '' }}</span>
+                                </div>
+                                <button class="add-device-btn" type="button">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add Device</span>
+                                </button>
+                            </div>
+                            <div class="devices-grid">
+                                {% for device in devices %}
+                                    <div class="device-card">
+                                        <div class="device-card-header">
+                                            <div class="device-info">
+                                                <div class="device-icon">
+                                                    <i class="fas fa-mobile-alt"></i>
+                                                </div>
+                                                <div class="device-details">
+                                                    <h3 class="device-name">{{ device.name or device.device_name or 'Unknown Device' }}</h3>
+                                                    <div class="device-status-badge connected">
+                                                        <i class="fas fa-circle"></i>
+                                                        <span>Connected</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="device-actions">
+                                                <button class="device-menu-btn" aria-label="Device actions">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="device-menu-dropdown hidden">
+                                                    <button class="remove-device-btn" data-device-code="{{ device.code }}">
+                                                        <i class="fas fa-trash"></i> Remove
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="device-card-body">
+                                            <div class="device-stat">
+                                                <i class="fas fa-qrcode"></i>
+                                                <div class="stat-info">
+                                                    <span class="stat-label">Device ID</span>
+                                                    <span class="stat-value">{{ device.code or device.device_code }}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="device-stat">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                                <div class="stat-info">
+                                                    <span class="stat-label">Last Location</span>
+                                                    <span class="stat-value">
+                                                        {% if device.location and (device.location.lat != 0 or device.location.lng != 0) %}
+                                                            {{ "%.4f"|format(device.location.lat) }}, {{ "%.4f"|format(device.location.lng) }}
+                                                        {% elif device.last_latitude is defined and device.last_longitude is defined and (device.last_latitude or device.last_longitude) %}
+                                                            {{ "%.4f"|format(device.last_latitude) }}, {{ "%.4f"|format(device.last_longitude) }}
+                                                        {% else %}
+                                                            Waiting for location...
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="device-stat">
+                                                <i class="fas fa-clock"></i>
+                                                <div class="stat-info">
+                                                    <span class="stat-label">Last Seen</span>
+                                                    <span class="stat-value">{{ device.connected_at }}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="device-stats-row">
+                                                <div class="device-stat-mini">
+                                                    <i class="fas fa-battery-half"></i>
+                                                    <span>{{ device.last_battery if device.last_battery is defined else '--' }}%</span>
+                                                </div>
+                                                <div class="device-stat-mini">
+                                                    <i class="fas fa-wifi"></i>
+                                                    <span>{{ device.last_network if device.last_network is defined else 'Unknown' }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="device-card-footer">
+                                            <a href="{{ url_for('main.show_map', device_id=device.code) }}" class="track-btn" target="_blank">
+                                                <i class="fas fa-location-arrow"></i>
+                                                Track Device
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <h2>No Devices Connected</h2>
+                            <p>Get started by connecting your first device to UniLocator</p>
+                            <button class="add-device-btn primary" type="button">
+                                <i class="fas fa-plus"></i>
+                                <span>Add Your First Device</span>
+                            </button>
+                        </div>
+                    {% endif %}
                     </div>
-                    <div class="devices-grid">
-                        {% for device in devices %}
-                            <div class="device-card">
-                                <div class="device-header">
-                                    <h3>{{ device.name or device.device_name or 'Unknown Device' }}</h3>
-                                    <span class="device-status">Connected</span>
-                                    <div class="device-actions">
-                                        <button class="device-menu-btn" aria-label="Device actions">
-                                            <i class="fas fa-ellipsis-v"></i>
-                                        </button>
-                                        <div class="device-menu-dropdown hidden">
-                                            <button class="remove-device-btn" data-device-code="{{ device.code }}">
-                                                <i class="fas fa-trash"></i> Remove
-                                            </button>
+                </div>
+
+                <!-- Live Map Section -->
+                <div id="map-page" class="page-content">
+                    <h1 class="page-title">Live Map</h1>
+                    <div class="page-content-inner">
+                    <div class="coming-soon">
+                        <div class="coming-soon-icon">
+                            <i class="fas fa-map"></i>
+                        </div>
+                        <h2>Live Map</h2>
+                        <p>Real-time device tracking and location visualization coming soon!</p>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- Friends Section -->
+                <div id="friends-page" class="page-content">
+                    <h1 class="page-title">Friends</h1>
+                    <div class="page-content-inner">
+                    <div class="coming-soon">
+                        <div class="coming-soon-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h2>Friends</h2>
+                        <p>Share device locations with trusted friends and family members.</p>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- Security Advisor Section -->
+                <div id="security-page" class="page-content">
+                    <h1 class="page-title">Security Advisor</h1>
+                    <div class="page-content-inner">
+                    <div class="coming-soon">
+                        <div class="coming-soon-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h2>Security Advisor</h2>
+                        <p>Get personalized security recommendations and threat alerts.</p>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- Profile Section -->
+                <div id="profile-page" class="page-content">
+                    <h1 class="page-title">Profile</h1>
+                    <div class="page-content-inner">
+                        <div class="profile-container">
+                            <!-- Profile Header -->
+                            <div class="profile-header">
+                                <div class="profile-avatar-section">
+                                    <div class="profile-avatar">
+                                        <img src="https://via.placeholder.com/128x128/4ade80/ffffff?text=U" alt="User Avatar" id="userAvatar">
+                                        <div class="status-indicator online" id="statusIndicator"></div>
+                                    </div>
+                                    <div class="profile-basic-info">
+                                        <h2 class="profile-name" id="profileName">John Doe</h2>
+                                        <div class="profile-tagline-wrapper">
+                                            <input type="text" class="profile-tagline" id="profileTagline" value="Explorer of cities 🌆" placeholder="Add a tagline...">
                                         </div>
                                     </div>
                                 </div>
-                                <div class="device-info">
-                                    <p><i class="fas fa-qrcode"></i> ID: {{ device.code or device.device_code }}</p>
-                                    <p><i class="fas fa-clock"></i> Connected: {{ device.connected_at }}</p>
-                                    <p><i class="fas fa-map-marker-alt"></i>
-                                        {% if device.location and (device.location.lat != 0 or device.location.lng != 0) %}
-                                            Location: {{ device.location.lat }}, {{ device.location.lng }}
-                                        {% elif device.last_latitude is defined and device.last_longitude is defined and (device.last_latitude or device.last_longitude) %}
-                                            Location: {{ device.last_latitude }}, {{ device.last_longitude }}
-                                        {% else %}
-                                            Waiting for location...
-                                        {% endif %}
-                                    </p>
-                                    <p><i class="fas fa-battery-half"></i> Battery: {{ device.last_battery if device.last_battery is defined else 'Unknown' }}%</p>
-                                    <p><i class="fas fa-wifi"></i> Network: {{ device.last_network if device.last_network is defined else 'Unknown' }}</p>
-                                    
-                                    <a href="{{ url_for('main.show_map', device_id=device.code) }}" class="btn-map" target="_blank">
-                                        <i class="fas fa-map"></i> Track
-                                    </a>
+                                <button class="share-profile-btn" id="shareProfileBtn">
+                                    <i class="fas fa-share-alt"></i>
+                                    Share Profile
+                                </button>
+                            </div>
+
+                            <!-- Profile Content Grid -->
+                            <div class="profile-content-grid">
+                                <!-- Editable Info Section -->
+                                <div class="profile-section">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-user-edit"></i>
+                                        Personal Information
+                                    </h3>
+                                    <form class="profile-form" id="profileForm">
+                                        <div class="form-group">
+                                            <label for="firstName">First Name</label>
+                                            <input type="text" id="firstName" name="firstName" value="John" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="lastName">Last Name</label>
+                                            <input type="text" id="lastName" name="lastName" value="Doe" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="email">Email Address</label>
+                                            <input type="email" id="email" name="email" value="john.doe@example.com" required>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Account Summary Section -->
+                                <div class="profile-section">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-chart-bar"></i>
+                                        Account Summary
+                                    </h3>
+                                    <div class="account-stats">
+                                        <div class="stat-card">
+                                            <div class="stat-icon">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="stat-info">
+                                                <span class="stat-label">Username</span>
+                                                <span class="stat-value">@johndoe</span>
+                                            </div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="stat-icon">
+                                                <i class="fas fa-mobile-alt"></i>
+                                            </div>
+                                            <div class="stat-info">
+                                                <span class="stat-label">Linked Devices</span>
+                                                <span class="stat-value">{{ devices|length if devices else 0 }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="stat-icon">
+                                                <i class="fas fa-users"></i>
+                                            </div>
+                                            <div class="stat-info">
+                                                <span class="stat-label">Groups Joined</span>
+                                                <span class="stat-value">3</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        {% endfor %}
+
+                            <!-- Save Changes Button -->
+                            <div class="profile-actions">
+                                <button class="save-changes-btn" id="saveChangesBtn">
+                                    <i class="fas fa-save"></i>
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            {% else %}
-                <div class="welcome-section">
-                    <h2>Welcome to UniLocator</h2>
-                    <p>No devices connected yet. Click below to add your first device.</p>
-                    <button class="add-device-btn" type="button">
-                        <i class="fas fa-plus"></i> Add New Device
-                    </button>
+
+                <!-- Settings Section -->
+                <div id="settings-page" class="page-content">
+                    <h1 class="page-title">Settings</h1>
+                    <div class="page-content-inner">
+                        <form class="settings-container" id="settingsForm">
+                            <!-- General Section -->
+                            <div class="settings-card">
+                                <h2 class="settings-section-title">General</h2>
+                                <p class="settings-section-desc">Manage general application settings.</p>
+                                <div class="settings-row settings-row-flex">
+                                    <div class="settings-field">
+                                        <label for="themeSelect">Theme</label>
+                                        <select id="themeSelect" name="theme">
+                                            <option value="dark">Dark</option>
+                                            <option value="light">Light</option>
+                                            <option value="system">System</option>
+                                        </select>
+                                    </div>
+                                    <div class="settings-field">
+                                        <label for="languageSelect">Language</label>
+                                        <select id="languageSelect" name="language">
+                                            <option value="en">English</option>
+                                            <option value="hi">Hindi</option>
+                                            <option value="es">Spanish</option>
+                                            <option value="fr">French</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Location Sharing Section -->
+                            <div class="settings-card">
+                                <h2 class="settings-section-title">Location Sharing</h2>
+                                <p class="settings-section-desc">Control your location sharing preferences.</p>
+                                <div class="settings-row">
+                                    <div class="settings-toggle-group">
+                                        <div class="settings-toggle-label">
+                                            <span>Enable Live Sharing</span>
+                                            <small>Allow UniLocator to track your device locations in real-time.</small>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="liveSharingToggle" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="settings-toggle-group">
+                                        <div class="settings-toggle-label">
+                                            <span>Background Tracking</span>
+                                            <small>Allow location updates when the app is in the background.</small>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="backgroundTrackingToggle" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="settings-toggle-group">
+                                        <div class="settings-toggle-label">
+                                            <span>Auto-pause on Low Battery</span>
+                                            <small>Automatically pause location sharing when battery is below 20%.</small>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="lowBatteryToggle">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Notifications Section -->
+                            <div class="settings-card">
+                                <h2 class="settings-section-title">Notifications</h2>
+                                <p class="settings-section-desc">Manage how you receive alerts.</p>
+                                <div class="settings-row">
+                                    <div class="settings-toggle-group">
+                                        <div class="settings-toggle-label">
+                                            <span>Friend Requests</span>
+                                            <small>Receive alerts for new friend requests.</small>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="friendRequestsToggle" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="settings-toggle-group">
+                                        <div class="settings-toggle-label">
+                                            <span>Group Invites</span>
+                                            <small>Get notified about new group invitations.</small>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="groupInvitesToggle" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="settings-toggle-group">
+                                        <div class="settings-toggle-label">
+                                            <span>Device Disconnected</span>
+                                            <small>Get notified when a device goes offline.</small>
+                                        </div>
+                                        <label class="switch">
+                                            <input type="checkbox" id="deviceDisconnectedToggle" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Save Button -->
+                            <div class="settings-actions">
+                                <button type="submit" class="save-settings-btn">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            {% endif %}
-        </div>
-    </main>
+            </div>
+        </main>
+    </div>
 
     <!-- Add Device Modal -->
     <div id="addDeviceModal" class="modal">
@@ -162,15 +553,15 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="modal-footer">
-                    <button class="btn-previous" disabled>
-                        <i class="fas fa-arrow-left"></i> Previous
-                    </button>
-                    <button class="btn-next" id="step2Next" disabled>
-                        Next <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn-previous" disabled>
+                    <i class="fas fa-arrow-left"></i> Previous
+                </button>
+                <button class="btn-next" id="step2Next" disabled>
+                    Next <i class="fas fa-arrow-right"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -194,8 +585,305 @@
     <script src="/firebase_auth/web/auth-service-cdn.js"></script>
     
     <script>
-        // Firebase is loaded but we don't need to show username in navbar anymore
-        // The profile page will handle user authentication display
+        // Sidebar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarClose = document.getElementById('sidebarClose');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const sidebarLinks = document.querySelectorAll('.sidebar-link[data-page]');
+
+            // Toggle sidebar
+            function toggleSidebar() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+                document.body.classList.toggle('sidebar-open');
+            }
+
+            // Close sidebar
+            function closeSidebar() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                document.body.classList.remove('sidebar-open');
+            }
+
+            // Event listeners
+            sidebarToggle?.addEventListener('click', toggleSidebar);
+            sidebarClose?.addEventListener('click', closeSidebar);
+            sidebarOverlay?.addEventListener('click', closeSidebar);
+
+            // Handle sidebar navigation
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all items
+                    document.querySelectorAll('.sidebar-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked item
+                    this.closest('.sidebar-item').classList.add('active');
+                    
+                    // Get the page data attribute
+                    const page = this.getAttribute('data-page');
+                    
+                    if (page) {
+                        // Hide all page content sections
+                        document.querySelectorAll('.page-content').forEach(content => {
+                            content.classList.remove('active');
+                        });
+                        
+                        // Show the selected page content
+                        const targetPage = document.getElementById(page + '-page');
+                        if (targetPage) {
+                            targetPage.classList.add('active');
+                        }
+                        
+                        // Update page title
+                        const pageTitle = document.querySelector('.page-title');
+                        const pageName = this.querySelector('span').textContent;
+                        if (pageTitle) {
+                            pageTitle.textContent = pageName;
+                        }
+                    }
+                    
+                    // Close sidebar on mobile
+                    if (window.innerWidth <= 768) {
+                        closeSidebar();
+                    }
+                    
+                    console.log('Navigating to:', page);
+                });
+            });
+
+            // Close sidebar on window resize if mobile
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    closeSidebar();
+                }
+            });
+
+            // Profile Page JavaScript
+            initializeProfilePage();
+
+            // Firebase auth state handling
+            function updateNavbarUsername(user) {
+                var name = '';
+                if (user) {
+                    name = user.displayName || user.email || 'User';
+                }
+                var nameSpan = document.getElementById('navbar-username');
+                if (nameSpan) nameSpan.textContent = name;
+            }
+            
+            // Initialize Firebase auth listener when available
+            function initializeAuth() {
+                if (window.firebase && window.firebase.auth) {
+                    window.firebase.auth().onAuthStateChanged(updateNavbarUsername);
+                } else if (window.authService && window.authService.onAuthStateChanged) {
+                    window.authService.onAuthStateChanged(updateNavbarUsername);
+                } else {
+                    // Retry in 100ms if Firebase is not ready yet
+                    setTimeout(initializeAuth, 100);
+                }
+            }
+            
+            initializeAuth();
+        });
+
+        // Profile Page Functions
+        function initializeProfilePage() {
+            const saveBtn = document.getElementById('saveChangesBtn');
+            const shareBtn = document.getElementById('shareProfileBtn');
+            const profileForm = document.getElementById('profileForm');
+            const firstNameInput = document.getElementById('firstName');
+            const lastNameInput = document.getElementById('lastName');
+            const emailInput = document.getElementById('email');
+            const profileNameDisplay = document.getElementById('profileName');
+            const profileTagline = document.getElementById('profileTagline');
+            const usernameDisplay = document.querySelector('.stat-value');
+
+            // Fetch user info from Firebase Auth
+            function populateUserProfile() {
+                let user = null;
+                if (window.firebase && window.firebase.auth) {
+                    user = window.firebase.auth().currentUser;
+                } else if (window.authService && window.authService.getCurrentUser) {
+                    user = window.authService.getCurrentUser();
+                }
+                if (user) {
+                    // Split displayName into first/last if possible
+                    if (user.displayName) {
+                        const [first, ...rest] = user.displayName.split(' ');
+                        firstNameInput.value = first || '';
+                        lastNameInput.value = rest.join(' ') || '';
+                        profileNameDisplay.textContent = user.displayName;
+                    }
+                    if (user.email) {
+                        emailInput.value = user.email;
+                    }
+                    // Username (use email prefix or UID as fallback)
+                    let username = user.displayName || (user.email ? user.email.split('@')[0] : user.uid);
+                    if (usernameDisplay) usernameDisplay.textContent = '@' + username.replace(/\s+/g, '').toLowerCase();
+                }
+            }
+
+            // Wait for Firebase Auth to be ready
+            function waitForFirebaseUser() {
+                if ((window.firebase && window.firebase.auth && window.firebase.auth().currentUser) ||
+                    (window.authService && window.authService.getCurrentUser && window.authService.getCurrentUser())) {
+                    populateUserProfile();
+                } else {
+                    setTimeout(waitForFirebaseUser, 200);
+                }
+            }
+            waitForFirebaseUser();
+
+            // Update profile name when first/last name changes
+            function updateProfileName() {
+                const firstName = firstNameInput.value.trim();
+                const lastName = lastNameInput.value.trim();
+                const fullName = `${firstName} ${lastName}`.trim();
+                if (fullName) {
+                    profileNameDisplay.textContent = fullName;
+                }
+            }
+
+            // Form validation
+            function validateForm() {
+                const firstName = firstNameInput.value.trim();
+                const lastName = lastNameInput.value.trim();
+                const email = document.getElementById('email').value.trim();
+                
+                if (!firstName || !lastName || !email) {
+                    return false;
+                }
+                
+                // Basic email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
+            // Save changes handler
+            saveBtn?.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (!validateForm()) {
+                    alert('Please fill in all fields with valid information.');
+                    return;
+                }
+
+                // Show loading state
+                const originalText = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                saveBtn.disabled = true;
+
+                // Simulate API call
+                setTimeout(() => {
+                    // Reset button
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.disabled = false;
+                    
+                    // Show success message
+                    showSuccessMessage('Profile updated successfully!');
+                    
+                    // Update profile name display
+                    updateProfileName();
+                }, 1500);
+            });
+
+            // Share profile handler
+            shareBtn?.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Simulate sharing
+                const profileUrl = `${window.location.origin}/profile/${document.getElementById('firstName').value.toLowerCase()}`;
+                
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'My UniLocator Profile',
+                        text: 'Check out my UniLocator profile!',
+                        url: profileUrl
+                    });
+                } else {
+                    // Fallback to clipboard
+                    navigator.clipboard.writeText(profileUrl).then(() => {
+                        showSuccessMessage('Profile link copied to clipboard!');
+                    });
+                }
+            });
+
+            // Real-time name update
+            firstNameInput?.addEventListener('input', updateProfileName);
+            lastNameInput?.addEventListener('input', updateProfileName);
+
+            // Auto-save tagline
+            profileTagline?.addEventListener('blur', function() {
+                showSuccessMessage('Tagline updated!');
+            });
+        }
+
+        // Settings Page JS
+        (function() {
+            const form = document.getElementById('settingsForm');
+            if (!form) return;
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const btn = form.querySelector('.save-settings-btn');
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                btn.disabled = true;
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.disabled = false;
+                    showSuccessMessage('Settings saved!');
+                }, 1200);
+            });
+            // Optional: toggle switches visual feedback (already handled by CSS)
+        })();
+
+        // Helper function to show success messages
+        function showSuccessMessage(message) {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.className = 'success-toast';
+            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--success);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-weight: 600;
+                z-index: 10000;
+                opacity: 0;
+                transform: translateX(100px);
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100px)';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
     </script>
 </body>
 </html>
