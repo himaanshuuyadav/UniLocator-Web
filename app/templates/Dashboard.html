@@ -103,114 +103,85 @@
                 <div id="devices-page" class="page-content active">
                     <h1 class="page-title">Devices</h1>
                     <div class="page-content-inner">
-                    {% if devices %}
+                        <!-- Quick Actions -->
+                        <div class="devices-quick-actions">
+                            <button class="quick-action-btn" id="addDeviceBtn">
+                                <i class="fas fa-plus"></i>
+                                <span>Add Device</span>
+                            </button>
+                            <button class="quick-action-btn" id="createGroupBtn">
+                                <i class="fas fa-users"></i>
+                                <span>Create Group</span>
+                            </button>
+                            <button class="quick-action-btn" id="scanQRBtn">
+                                <i class="fas fa-qrcode"></i>
+                                <span>Scan QR</span>
+                            </button>
+                        </div>
+
+                        <!-- My Devices Section -->
                         <div class="devices-section">
                             <div class="devices-section-header">
                                 <div class="section-title">
-                                    <h2>Connected Devices</h2>
-                                    <span class="device-count">{{ devices|length }} device{{ 's' if devices|length != 1 else '' }}</span>
+                                    <h2>My Devices</h2>
+                                    <span class="device-count" id="myDevicesCount">Loading...</span>
                                 </div>
-                                <button class="add-device-btn" type="button">
+                                <div class="section-actions">
+                                    <button class="filter-btn" data-filter="all">All</button>
+                                    <button class="filter-btn" data-filter="online">Online</button>
+                                    <button class="filter-btn" data-filter="offline">Offline</button>
+                                </div>
+                            </div>
+                            <div class="devices-grid" id="myDevicesGrid">
+                                <!-- My devices will be loaded dynamically -->
+                                <div class="loading-placeholder">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span>Loading your devices...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Individual Devices Section -->
+                        <div class="devices-section">
+                            <div class="devices-section-header">
+                                <div class="section-title">
+                                    <h2>Individual Devices</h2>
+                                    <span class="device-count" id="individualDevicesCount">0 devices</span>
+                                </div>
+                                <button class="add-device-btn" id="addIndividualDeviceBtn">
                                     <i class="fas fa-plus"></i>
                                     <span>Add Device</span>
                                 </button>
                             </div>
-                            <div class="devices-grid">
-                                {% for device in devices %}
-                                    <div class="device-card">
-                                        <div class="device-card-header">
-                                            <div class="device-info">
-                                                <div class="device-icon">
-                                                    <i class="fas fa-mobile-alt"></i>
-                                                </div>
-                                                <div class="device-details">
-                                                    <h3 class="device-name">{{ device.name or device.device_name or 'Unknown Device' }}</h3>
-                                                    <div class="device-status-badge connected">
-                                                        <i class="fas fa-circle"></i>
-                                                        <span>Connected</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="device-actions">
-                                                <button class="device-menu-btn" aria-label="Device actions">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </button>
-                                                <div class="device-menu-dropdown hidden">
-                                                    <button class="remove-device-btn" data-device-code="{{ device.code }}">
-                                                        <i class="fas fa-trash"></i> Remove
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="device-card-body">
-                                            <div class="device-stat">
-                                                <i class="fas fa-qrcode"></i>
-                                                <div class="stat-info">
-                                                    <span class="stat-label">Device ID</span>
-                                                    <span class="stat-value">{{ device.code or device.device_code }}</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="device-stat">
-                                                <i class="fas fa-map-marker-alt"></i>
-                                                <div class="stat-info">
-                                                    <span class="stat-label">Last Location</span>
-                                                    <span class="stat-value">
-                                                        {% if device.location and (device.location.lat != 0 or device.location.lng != 0) %}
-                                                            {{ "%.4f"|format(device.location.lat) }}, {{ "%.4f"|format(device.location.lng) }}
-                                                        {% elif device.last_latitude is defined and device.last_longitude is defined and (device.last_latitude or device.last_longitude) %}
-                                                            {{ "%.4f"|format(device.last_latitude) }}, {{ "%.4f"|format(device.last_longitude) }}
-                                                        {% else %}
-                                                            Waiting for location...
-                                                        {% endif %}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="device-stat">
-                                                <i class="fas fa-clock"></i>
-                                                <div class="stat-info">
-                                                    <span class="stat-label">Last Seen</span>
-                                                    <span class="stat-value">{{ device.connected_at }}</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="device-stats-row">
-                                                <div class="device-stat-mini">
-                                                    <i class="fas fa-battery-half"></i>
-                                                    <span>{{ device.last_battery if device.last_battery is defined else '--' }}%</span>
-                                                </div>
-                                                <div class="device-stat-mini">
-                                                    <i class="fas fa-wifi"></i>
-                                                    <span>{{ device.last_network if device.last_network is defined else 'Unknown' }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="device-card-footer">
-                                            <a href="{{ url_for('main.show_map', device_id=device.code) }}" class="track-btn" target="_blank">
-                                                <i class="fas fa-location-arrow"></i>
-                                                Track Device
-                                            </a>
-                                        </div>
-                                    </div>
-                                {% endfor %}
+                            <div class="devices-grid" id="individualDevicesGrid">
+                                <div class="empty-state-mini">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <p>No individual devices added yet</p>
+                                    <button class="add-device-btn-mini">Add Device</button>
+                                </div>
                             </div>
                         </div>
-                    {% else %}
-                        <div class="empty-state">
-                            <div class="empty-icon">
-                                <i class="fas fa-mobile-alt"></i>
+
+                        <!-- Groups Section -->
+                        <div class="devices-section">
+                            <div class="devices-section-header">
+                                <div class="section-title">
+                                    <h2>Groups</h2>
+                                    <span class="device-count" id="groupsCount">0 groups</span>
+                                </div>
+                                <button class="add-device-btn" id="createGroupMainBtn">
+                                    <i class="fas fa-users-plus"></i>
+                                    <span>Create Group</span>
+                                </button>
                             </div>
-                            <h2>No Devices Connected</h2>
-                            <p>Get started by connecting your first device to UniLocator</p>
-                            <button class="add-device-btn primary" type="button">
-                                <i class="fas fa-plus"></i>
-                                <span>Add Your First Device</span>
-                            </button>
+                            <div class="groups-grid" id="groupsGrid">
+                                <div class="empty-state-mini">
+                                    <i class="fas fa-users"></i>
+                                    <p>No groups created yet</p>
+                                    <button class="create-group-btn-mini">Create Group</button>
+                                </div>
+                            </div>
                         </div>
-                    {% endif %}
                     </div>
                 </div>
 
@@ -218,27 +189,273 @@
                 <div id="map-page" class="page-content">
                     <h1 class="page-title">Live Map</h1>
                     <div class="page-content-inner">
-                    <div class="coming-soon">
-                        <div class="coming-soon-icon">
-                            <i class="fas fa-map"></i>
+                        <!-- Map Controls -->
+                        <div class="map-controls">
+                            <div class="map-filters">
+                                <button class="map-filter-btn active" data-filter="all">
+                                    <i class="fas fa-globe"></i>
+                                    <span>All Devices</span>
+                                </button>
+                                <button class="map-filter-btn" data-filter="my-devices">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <span>My Devices</span>
+                                </button>
+                                <button class="map-filter-btn" data-filter="groups">
+                                    <i class="fas fa-users"></i>
+                                    <span>Groups</span>
+                                </button>
+                                <button class="map-filter-btn" data-filter="friends">
+                                    <i class="fas fa-user-friends"></i>
+                                    <span>Friends</span>
+                                </button>
+                            </div>
+                            <div class="map-actions">
+                                <button class="map-action-btn" id="centerMapBtn">
+                                    <i class="fas fa-crosshairs"></i>
+                                    <span>Center</span>
+                                </button>
+                                <button class="map-action-btn" id="refreshMapBtn">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>Refresh</span>
+                                </button>
+                                <button class="map-action-btn" id="fullscreenMapBtn">
+                                    <i class="fas fa-expand"></i>
+                                    <span>Fullscreen</span>
+                                </button>
+                            </div>
                         </div>
-                        <h2>Live Map</h2>
-                        <p>Real-time device tracking and location visualization coming soon!</p>
-                    </div>
+
+                        <!-- Map Container -->
+                        <div class="map-container">
+                            <div id="liveMap" class="live-map">
+                                <!-- Map will be initialized here -->
+                                <div class="map-loading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span>Loading map...</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Device Legend -->
+                            <div class="map-legend">
+                                <h4>Device Types</h4>
+                                <div class="legend-items">
+                                    <div class="legend-item">
+                                        <div class="legend-marker my-device"></div>
+                                        <span>My Devices</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-marker group-device"></div>
+                                        <span>Group Devices</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-marker friend-device"></div>
+                                        <span>Friend Devices</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-marker individual-device"></div>
+                                        <span>Individual Devices</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Device List Panel -->
+                        <div class="map-device-panel" id="mapDevicePanel">
+                            <div class="panel-header">
+                                <h3>Tracked Devices</h3>
+                                <button class="panel-toggle-btn" id="panelToggleBtn">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                            <div class="panel-content">
+                                <div class="device-search">
+                                    <input type="text" placeholder="Search devices..." id="deviceSearchInput">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <div class="tracked-devices-list" id="trackedDevicesList">
+                                    <!-- Device list will be populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Friends Section -->
                 <div id="friends-page" class="page-content">
-                    <h1 class="page-title">Friends</h1>
+                    <h1 class="page-title">Friends & Social</h1>
                     <div class="page-content-inner">
-                    <div class="coming-soon">
-                        <div class="coming-soon-icon">
-                            <i class="fas fa-users"></i>
+                        <!-- Friends Navigation -->
+                        <div class="friends-nav">
+                            <button class="friends-nav-btn active" data-tab="friends">
+                                <i class="fas fa-user-friends"></i>
+                                <span>Friends</span>
+                            </button>
+                            <button class="friends-nav-btn" data-tab="groups">
+                                <i class="fas fa-users"></i>
+                                <span>Groups</span>
+                            </button>
+                            <button class="friends-nav-btn" data-tab="requests">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Requests</span>
+                                <span class="notification-badge" id="requestsBadge">0</span>
+                            </button>
+                            <button class="friends-nav-btn" data-tab="search">
+                                <i class="fas fa-search"></i>
+                                <span>Find Friends</span>
+                            </button>
                         </div>
-                        <h2>Friends</h2>
-                        <p>Share device locations with trusted friends and family members.</p>
+
+                        <!-- Friends Tab Content -->
+                        <div class="friends-tab-content active" id="friends-tab">
+                            <div class="friends-header">
+                                <div class="friends-stats">
+                                    <div class="stat-item">
+                                        <span class="stat-number" id="totalFriends">0</span>
+                                        <span class="stat-label">Friends</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-number" id="onlineFriends">0</span>
+                                        <span class="stat-label">Online</span>
+                                    </div>
+                                </div>
+                                <div class="friends-actions">
+                                    <button class="friends-action-btn" id="addFriendBtn">
+                                        <i class="fas fa-user-plus"></i>
+                                        Add Friend
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Friends List -->
+                            <div class="friends-list" id="friendsList">
+                                <div class="loading-placeholder">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span>Loading friends...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Groups Tab Content -->
+                        <div class="friends-tab-content" id="groups-tab">
+                            <div class="groups-header">
+                                <h3>My Groups</h3>
+                                <button class="friends-action-btn" id="createSocialGroupBtn">
+                                    <i class="fas fa-plus"></i>
+                                    Create Group
+                                </button>
+                            </div>
+                            <div class="social-groups-list" id="socialGroupsList">
+                                <div class="empty-state-mini">
+                                    <i class="fas fa-users"></i>
+                                    <p>No groups yet</p>
+                                    <button class="create-group-btn-mini">Create Your First Group</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Requests Tab Content -->
+                        <div class="friends-tab-content" id="requests-tab">
+                            <div class="requests-header">
+                                <h3>Friend Requests</h3>
+                            </div>
+                            <div class="requests-list" id="requestsList">
+                                <div class="empty-state-mini">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>No pending requests</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Search Tab Content -->
+                        <div class="friends-tab-content" id="search-tab">
+                            <div class="search-header">
+                                <h3>Find Friends</h3>
+                                <div class="search-bar">
+                                    <input type="text" placeholder="Search by username or email..." id="friendSearchInput">
+                                    <button class="search-btn" id="searchFriendsBtn">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="search-results" id="searchResults">
+                                <div class="search-placeholder">
+                                    <i class="fas fa-search"></i>
+                                    <p>Search for friends by username or email</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                <!-- Chat Window -->
+                <div class="chat-window" id="chatWindow">
+                    <div class="chat-header">
+                        <div class="chat-user-info">
+                            <img src="../static/img/user-solid.svg" alt="User" class="chat-avatar" id="chatAvatar">
+                            <div class="chat-user-details">
+                                <span class="chat-username" id="chatUsername">John Doe</span>
+                                <span class="chat-status" id="chatStatus">Online</span>
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <button class="chat-action-btn" id="voiceCallBtn" title="Voice Call">
+                                <i class="fas fa-phone"></i>
+                            </button>
+                            <button class="chat-action-btn" id="videoCallBtn" title="Video Call">
+                                <i class="fas fa-video"></i>
+                            </button>
+                            <button class="chat-action-btn" id="chatInfoBtn" title="Chat Info">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                            <button class="chat-action-btn" id="closeChatBtn" title="Close Chat">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Chat messages will be populated here -->
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <div class="chat-input-container">
+                            <button class="chat-attachment-btn" id="attachmentBtn">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <input type="text" placeholder="Type a message..." class="chat-input" id="chatInput">
+                            <button class="chat-emoji-btn" id="emojiBtn">
+                                <i class="fas fa-smile"></i>
+                            </button>
+                            <button class="chat-send-btn" id="sendMessageBtn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <div class="chat-typing-indicator" id="typingIndicator">
+                            <span></span> is typing...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Call Window -->
+                <div class="call-window" id="callWindow">
+                    <div class="call-content">
+                        <div class="call-user-info">
+                            <img src="../static/img/user-solid.svg" alt="User" class="call-avatar" id="callAvatar">
+                            <span class="call-username" id="callUsername">John Doe</span>
+                            <span class="call-status" id="callStatus">Calling...</span>
+                        </div>
+                        
+                        <div class="call-controls">
+                            <button class="call-control-btn mute-btn" id="muteBtn" title="Mute">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button class="call-control-btn end-call-btn" id="endCallBtn" title="End Call">
+                                <i class="fas fa-phone-slash"></i>
+                            </button>
+                            <button class="call-control-btn video-btn" id="toggleVideoBtn" title="Toggle Video">
+                                <i class="fas fa-video"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -649,6 +866,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/Dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/devices.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/friends.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 
     <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
