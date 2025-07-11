@@ -11,5 +11,5 @@ app = create_app()
 
 if __name__ == '__main__':
     print("Starting UniLocator server...")
-    print("Open http://192.168.41.156:5000 in your browser.")
+    print("Open http://172.21.144.1:5000 in your browser.")
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)

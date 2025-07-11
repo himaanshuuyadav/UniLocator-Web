@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+    <!-- YouTube-style Loading Bar -->
+    <div id="loadingBar" class="loading-bar">
+        <div class="loading-progress"></div>
+    </div>
+
     <!-- Mobile Sidebar Toggle -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
@@ -42,12 +47,6 @@
                     <a href="#" class="sidebar-link" data-page="friends">
                         <i class="fas fa-users"></i>
                         <span>Friends</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link" data-page="security">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Security Advisor</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
@@ -243,20 +242,6 @@
                     </div>
                 </div>
 
-                <!-- Security Advisor Section -->
-                <div id="security-page" class="page-content">
-                    <h1 class="page-title">Security Advisor</h1>
-                    <div class="page-content-inner">
-                    <div class="coming-soon">
-                        <div class="coming-soon-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <h2>Security Advisor</h2>
-                        <p>Get personalized security recommendations and threat alerts.</p>
-                    </div>
-                    </div>
-                </div>
-
                 <!-- Profile Section -->
                 <div id="profile-page" class="page-content">
                     <h1 class="page-title">Profile</h1>
@@ -266,7 +251,7 @@
                             <div class="profile-header">
                                 <div class="profile-avatar-section">
                                     <div class="profile-avatar">
-                                        <img src="https://via.placeholder.com/128x128/4ade80/ffffff?text=U" alt="User Avatar" id="userAvatar">
+                                        <img src="../static/img/user-solid.svg" alt="User Avatar" id="userAvatar">
                                         <div class="status-indicator online" id="statusIndicator"></div>
                                     </div>
                                     <div class="profile-basic-info">
@@ -461,6 +446,17 @@
                                 </div>
                             </div>
 
+                            <!-- Account Management Section -->
+                            <div class="settings-card">
+                                <h2 class="settings-section-title">Account Management</h2>
+                                <p class="settings-section-desc">Manage your account and session.</p>
+                                <div class="settings-row">
+                                    <button type="button" class="logout-btn" id="logoutBtn">
+                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                    </button>
+                                </div>
+                            </div>
+
                             <!-- Save Button -->
                             <div class="settings-actions">
                                 <button type="submit" class="save-settings-btn">
@@ -481,87 +477,13 @@
                 <h2>Add New Device</h2>
                 <span class="close">&times;</span>
             </div>
-            <!-- <hr class="modal-divider"> -->
-            <div class="modal-body">
-                <div class="steps">
-                    <div class="step step-1 active">
-                        <h3>Download UniLocator App</h3>
-                        <div class="app-download">
-                            <p>Scan the QR code to download the UniLocator app from GitHub:</p>
-                            
-                            <!-- QR Code Container -->
-                            <div id="githubQrContainer" class="github-qr-container">
-                                <div class="qr-wrapper">
-                                    <div id="githubQrCode" class="github-qr-code">
-                                        <!-- QR code will be generated here -->
-                                    </div>
-                                </div>
-                                <p class="qr-description">Scan with your phone's camera to download the APK</p>
-                                <button id="showDirectDownload" class="direct-download-toggle">
-                                    <i class="fas fa-download"></i>
-                                    Download APK Here
-                                </button>
-                            </div>
-                            
-                            <!-- Direct Download Container (Hidden initially) -->
-                            <div id="directDownloadContainer" class="direct-download-container hidden">
-                                <p>Download the APK directly to this device:</p>
-                                <a href="#" id="directDownloadBtn" class="direct-download-btn">
-                                    <i class="fab fa-android"></i>
-                                    Download UniLocator APK
-                                </a>
-                                <button id="showQrAgain" class="show-qr-toggle">
-                                    <i class="fas fa-qrcode"></i>
-                                    Show QR Code Again
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="step step-2">
-                        <h3>Choose Connection Method</h3>
-                        <div class="connection-methods">
-                            <button class="connection-method-btn" data-method="qr">
-                                <i class="fas fa-qrcode"></i>
-                                <span>Connect via QR Code</span>
-                                <small>Scan QR code with your device</small>
-                            </button>
-                            <button class="connection-method-btn" data-method="code">
-                                <i class="fas fa-keyboard"></i>
-                                <span>Connect via Code</span>
-                                <small>Enter unique code manually</small>
-                            </button>
-                        </div>
-                    </div>
-                    </div>
-
-                    <div class="step step-3">
-                        <h3>Connect Your Device</h3>
-                        <div class="connection-result">
-                            <div class="qr-method hidden">
-                                <div class="connection-qr-container">
-                                    <div id="qrCode" class="connection-qr-code"></div>
-                                </div>
-                                <p class="connection-description">Scan this QR code using the UniLocator app</p>
-                            </div>
-                            <div class="code-method hidden">
-                                <div class="connection-code-container">
-                                    <div id="connectionCode" class="connection-unique-code"></div>
-                                </div>
-                                <p class="connection-description">Enter this code in your UniLocator app</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content will be inserted here -->
             </div>
             
-            <div class="modal-footer">
-                <button class="btn-previous" disabled>
-                    <i class="fas fa-arrow-left"></i> Previous
-                </button>
-                <button class="btn-next" id="step2Next" disabled>
-                    Next <i class="fas fa-arrow-right"></i>
-                </button>
+            <div class="modal-footer" id="modalFooter">
+                <!-- Dynamic footer content will be inserted here -->
             </div>
         </div>
     </div>
@@ -572,9 +494,43 @@
     </div>
 
     <!-- Scripts -->
+    <script>
+        // Try to load QRCode library with multiple fallbacks
+        function loadQRCode() {
+            const scripts = [
+                'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
+                'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js'
+            ];
+            
+            let currentScript = 0;
+            
+            function tryLoadScript() {
+                if (currentScript >= scripts.length) {
+                    console.log('All QRCode script sources failed to load');
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = scripts[currentScript];
+                script.onload = function() {
+                    console.log('QRCode library loaded from:', scripts[currentScript]);
+                };
+                script.onerror = function() {
+                    console.log('Failed to load QRCode from:', scripts[currentScript]);
+                    currentScript++;
+                    tryLoadScript();
+                };
+                document.head.appendChild(script);
+            }
+            
+            tryLoadScript();
+        }
+        
+        loadQRCode();
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/add_device.js') }}"></script>
 
     <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -585,6 +541,104 @@
     <script src="/firebase_auth/web/auth-service-cdn.js"></script>
     
     <script>
+        // Loading Bar Controller
+        class LoadingBar {
+            constructor() {
+                this.element = document.getElementById('loadingBar');
+                this.progress = this.element.querySelector('.loading-progress');
+                this.currentProgress = 0;
+                this.isVisible = false;
+            }
+
+            show() {
+                this.element.classList.add('active');
+                this.isVisible = true;
+                this.setProgress(0);
+            }
+
+            hide() {
+                this.setProgress(100);
+                setTimeout(() => {
+                    this.element.classList.remove('active');
+                    this.isVisible = false;
+                    this.currentProgress = 0;
+                    this.progress.style.width = '0%';
+                }, 300);
+            }
+
+            setProgress(percent) {
+                this.currentProgress = Math.min(100, Math.max(0, percent));
+                this.progress.style.width = this.currentProgress + '%';
+            }
+
+            increment(amount = 10) {
+                this.setProgress(this.currentProgress + amount);
+            }
+
+            startIndeterminate() {
+                this.element.classList.add('active', 'indeterminate');
+                this.isVisible = true;
+            }
+
+            stopIndeterminate() {
+                this.element.classList.remove('indeterminate');
+                this.hide();
+            }
+        }
+
+        // Global loading bar instance
+        window.loadingBar = new LoadingBar();
+
+        // Utility functions for common loading scenarios
+        window.showPageLoading = function() {
+            window.loadingBar.startIndeterminate();
+        };
+
+        window.hidePageLoading = function() {
+            window.loadingBar.stopIndeterminate();
+        };
+
+        window.simulateFormSubmission = function(callback, duration = 1500) {
+            window.loadingBar.show();
+            window.loadingBar.setProgress(10);
+            
+            let progress = 10;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                window.loadingBar.setProgress(Math.min(progress, 90));
+                
+                if (progress >= 90) {
+                    clearInterval(interval);
+                }
+            }, duration / 10);
+
+            setTimeout(() => {
+                window.loadingBar.setProgress(100);
+                clearInterval(interval);
+                if (callback) callback();
+                setTimeout(() => window.loadingBar.hide(), 300);
+            }, duration);
+        };
+
+        // Auto-show loading bar for fetch requests (if using fetch)
+        if (window.fetch) {
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                window.loadingBar.show();
+                window.loadingBar.setProgress(20);
+                
+                return originalFetch.apply(this, args)
+                    .then(response => {
+                        window.loadingBar.setProgress(80);
+                        return response;
+                    })
+                    .finally(() => {
+                        window.loadingBar.setProgress(100);
+                        setTimeout(() => window.loadingBar.hide(), 300);
+                    });
+            };
+        }
+
         // Sidebar functionality
         document.addEventListener('DOMContentLoaded', function() {
             const sidebarToggle = document.getElementById('sidebarToggle');
@@ -617,6 +671,20 @@
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                     
+                    // Show loading bar
+                    window.loadingBar.show();
+                    
+                    // Simulate loading progress
+                    let progress = 0;
+                    const progressInterval = setInterval(() => {
+                        progress += Math.random() * 30;
+                        window.loadingBar.setProgress(progress);
+                        
+                        if (progress >= 90) {
+                            clearInterval(progressInterval);
+                        }
+                    }, 100);
+                    
                     // Remove active class from all items
                     document.querySelectorAll('.sidebar-item').forEach(item => {
                         item.classList.remove('active');
@@ -629,23 +697,30 @@
                     const page = this.getAttribute('data-page');
                     
                     if (page) {
-                        // Hide all page content sections
-                        document.querySelectorAll('.page-content').forEach(content => {
-                            content.classList.remove('active');
-                        });
-                        
-                        // Show the selected page content
-                        const targetPage = document.getElementById(page + '-page');
-                        if (targetPage) {
-                            targetPage.classList.add('active');
-                        }
-                        
-                        // Update page title
-                        const pageTitle = document.querySelector('.page-title');
-                        const pageName = this.querySelector('span').textContent;
-                        if (pageTitle) {
-                            pageTitle.textContent = pageName;
-                        }
+                        // Simulate page load delay
+                        setTimeout(() => {
+                            // Hide all page content sections
+                            document.querySelectorAll('.page-content').forEach(content => {
+                                content.classList.remove('active');
+                            });
+                            
+                            // Show the selected page content
+                            const targetPage = document.getElementById(page + '-page');
+                            if (targetPage) {
+                                targetPage.classList.add('active');
+                            }
+                            
+                            // Update page title
+                            const pageTitle = document.querySelector('.page-title');
+                            const pageName = this.querySelector('span').textContent;
+                            if (pageTitle) {
+                                pageTitle.textContent = pageName;
+                            }
+                            
+                            // Hide loading bar
+                            window.loadingBar.hide();
+                            clearInterval(progressInterval);
+                        }, 500 + Math.random() * 500); // Random delay between 500-1000ms
                     }
                     
                     // Close sidebar on mobile
@@ -774,13 +849,31 @@
                     return;
                 }
 
+                // Show loading bar
+                window.loadingBar.show();
+                window.loadingBar.setProgress(20);
+
                 // Show loading state
                 const originalText = saveBtn.innerHTML;
                 saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
                 saveBtn.disabled = true;
 
+                // Simulate API call with progress updates
+                let progress = 20;
+                const progressInterval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    window.loadingBar.setProgress(progress);
+                    
+                    if (progress >= 90) {
+                        clearInterval(progressInterval);
+                    }
+                }, 150);
+
                 // Simulate API call
                 setTimeout(() => {
+                    // Complete loading bar
+                    window.loadingBar.setProgress(100);
+                    
                     // Reset button
                     saveBtn.innerHTML = originalText;
                     saveBtn.disabled = false;
@@ -790,6 +883,10 @@
                     
                     // Update profile name display
                     updateProfileName();
+                    
+                    // Hide loading bar
+                    window.loadingBar.hide();
+                    clearInterval(progressInterval);
                 }, 1500);
             });
 
@@ -830,14 +927,38 @@
             if (!form) return;
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
+                
+                // Show loading bar
+                window.loadingBar.show();
+                window.loadingBar.setProgress(15);
+                
                 const btn = form.querySelector('.save-settings-btn');
                 const original = btn.innerHTML;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
                 btn.disabled = true;
+                
+                // Simulate progress updates
+                let progress = 15;
+                const progressInterval = setInterval(() => {
+                    progress += Math.random() * 20;
+                    window.loadingBar.setProgress(progress);
+                    
+                    if (progress >= 85) {
+                        clearInterval(progressInterval);
+                    }
+                }, 120);
+                
                 setTimeout(() => {
+                    // Complete progress
+                    window.loadingBar.setProgress(100);
+                    
                     btn.innerHTML = original;
                     btn.disabled = false;
                     showSuccessMessage('Settings saved!');
+                    
+                    // Hide loading bar
+                    window.loadingBar.hide();
+                    clearInterval(progressInterval);
                 }, 1200);
             });
             // Optional: toggle switches visual feedback (already handled by CSS)

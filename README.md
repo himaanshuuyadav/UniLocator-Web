@@ -120,7 +120,7 @@ Unilocator/
 │   ├── Dashboard.css       # Landing page styles
 │   ├── Dashboard.js        # Landing page JavaScript
 │   ├── add_device.css      # Add device modal styles
-│   ├── add_device.js       # Add device modal JavaScript
+│   ├── dashboard.js        # Dashboard and modal functionality
 │   ├── auth.css           # Authentication page styles
 │   ├── auth.js            # Authentication page JavaScript
 │   ├── images/            # Image assets
