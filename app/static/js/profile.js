@@ -1,26 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Tab switching functionality
-    const profileTabs = document.querySelectorAll('.profile-tab');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-
-    profileTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabName = this.dataset.tab;
-            
-            // Remove active class from all tabs and panes
-            profileTabs.forEach(t => t.classList.remove('active'));
-            tabPanes.forEach(pane => pane.classList.remove('active'));
-            
-            // Add active class to clicked tab and corresponding pane
-            this.classList.add('active');
-            const targetPane = document.getElementById(tabName);
-            if (targetPane) {
-                targetPane.classList.add('active');
-            }
-        });
-    });
-
-    // Display Firebase username in profile
+    // Display Firebase username in navbar and profile
     function updateUsername(user) {
         var name = '';
         var email = '';
@@ -53,18 +32,92 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAuth();
 
     // Settings toggle handlers
-    const settingToggles = document.querySelectorAll('.toggle input[type="checkbox"]');
+    const settingToggles = document.querySelectorAll('.setting-item input[type="checkbox"]');
     settingToggles.forEach(toggle => {
         toggle.addEventListener('change', function() {
-            const settingName = this.closest('.setting-toggle').querySelector('span').textContent;
+            const settingName = this.id;
             const isEnabled = this.checked;
             
-            console.log(`Setting "${settingName}" changed to:`, isEnabled);
+            console.log(`Setting ${settingName} changed to:`, isEnabled);
             
             // You can add API calls here to save settings
             // saveUserSetting(settingName, isEnabled);
         });
     });
+
+    // Security button handlers
+    const securityBtns = document.querySelectorAll('.security-btn');
+    securityBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const buttonText = this.textContent.trim();
+            
+            switch(buttonText) {
+                case 'Change Password':
+                    handleChangePassword();
+                    break;
+                case 'Two-Factor Authentication':
+                    handleTwoFactor();
+                    break;
+                case 'Download Account Data':
+                    handleDownloadData();
+                    break;
+            }
+        });
+    });
+
+    function handleChangePassword() {
+        alert('Password change functionality would be implemented here. This would redirect to Firebase Auth password reset.');
+        // In a real implementation, you'd redirect to Firebase Auth password reset
+        if (window.firebase && window.firebase.auth) {
+            const user = window.firebase.auth().currentUser;
+            if (user && user.email) {
+                window.firebase.auth().sendPasswordResetEmail(user.email)
+                    .then(() => {
+                        alert('Password reset email sent to ' + user.email);
+                    })
+                    .catch((error) => {
+                        console.error('Error sending password reset email:', error);
+                        alert('Error sending password reset email. Please try again.');
+                    });
+            }
+        }
+    }
+
+    function handleTwoFactor() {
+        alert('Two-factor authentication setup would be implemented here.');
+        // This would involve setting up Firebase phone authentication
+    }
+
+    function handleDownloadData() {
+        // Download user data as JSON
+        fetch('/auth/download-data', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Failed to download data');
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'unilocator-data.json';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            console.error('Error downloading data:', error);
+            alert('Error downloading account data. Please try again.');
+        });
+    }
 
     // Save user setting function (placeholder)
     function saveUserSetting(settingName, value) {
@@ -189,63 +242,4 @@ function deleteAccount() {
             alert('Failed to delete account. Please try again.');
         });
     }
-}
-
-// Function to remove a device
-function removeDevice(deviceCode) {
-    if (confirm('Are you sure you want to remove this device?')) {
-        fetch('/devices/remove-device', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            credentials: 'include',
-            body: JSON.stringify({ device_code: deviceCode })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Device removed successfully!');
-                location.reload();
-            } else {
-                alert('Failed to remove device: ' + (data.message || 'Unknown error'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error removing device. Please try again.');
-        });
-    }
-}
-
-// Function to update profile
-function updateProfile() {
-    const displayName = document.getElementById('display-name').value;
-    const bio = document.getElementById('bio').value;
-    
-    fetch('/auth/update-profile', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-            display_name: displayName,
-            bio: bio
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Profile updated successfully!');
-        } else {
-            alert('Failed to update profile: ' + (data.message || 'Unknown error'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error updating profile. Please try again.');
-    });
 }
