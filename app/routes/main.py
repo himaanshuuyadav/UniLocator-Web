@@ -149,7 +149,15 @@ def profile():
         conn = sqlite3.connect('instance/unilocator.db')
         cursor = conn.cursor()
         
-        # Get device count for the user (using firebase_uid as user_id in connected_devices)
+        # Get user info if available
+        cursor.execute("""
+            SELECT firebase_uid, created_at
+            FROM users
+            WHERE firebase_uid = ?
+        """, (firebase_uid,))
+        user_data = cursor.fetchone()
+        
+        # Get device count for the user
         cursor.execute("""
             SELECT COUNT(*) FROM connected_devices WHERE user_id = ?
         """, (firebase_uid,))
@@ -157,11 +165,9 @@ def profile():
         
         conn.close()
         
-        # Since we're using Firebase auth, we don't need to query users table
-        # Firebase will provide the user info on the frontend
         profile_data = {
             'user_id': firebase_uid,
-            'created_at': 'Firebase User',  # This will be populated by Firebase on frontend
+            'created_at': user_data[1] if user_data else 'Unknown',
             'device_count': device_count
         }
         

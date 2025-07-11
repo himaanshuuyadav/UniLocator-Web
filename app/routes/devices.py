@@ -120,27 +120,37 @@ def connect_device():
 
 @bp.route('/remove-device', methods=['POST'])
 def remove_device():
+    from flask import session
+    
     data = request.get_json()
     device_code = data.get('device_code')
-    firebase_uid = request.headers.get('X-User-UID')
+    
+    # Use session authentication instead of headers
+    firebase_uid = session.get('user_id')
     if not firebase_uid:
         return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
     db = get_db()
     # Check if device exists and belongs to user
     cursor = db.execute('SELECT id FROM connected_devices WHERE device_code = ? AND user_id = ?', (device_code, firebase_uid))
     device = cursor.fetchone()
+    
     if not device:
         return jsonify({
             'success': False,
             'message': 'Device not found or not authorized.'
         }), 200
+    
     db.execute('DELETE FROM connected_devices WHERE device_code = ? AND user_id = ?', (device_code, firebase_uid))
     db.commit()
+    
     logging.info(f"[REMOVE] Device {device_code} removed for user {firebase_uid}")
+    
     socketio.emit('device_removed', {
         'device_code': device_code,
         'user_id': firebase_uid
     })
+    
     return jsonify({
         'success': True,
         'message': 'Device removed successfully.'
