@@ -754,6 +754,19 @@
             };
         }
 
+        // Handle direct navigation to profile section
+        function handleProfileNavigation() {
+            if (window.location.hash === '#profile') {
+                // Wait for sidebar navigation to be ready
+                setTimeout(() => {
+                    const profileLink = document.querySelector('.sidebar-link[data-page="profile"]');
+                    if (profileLink) {
+                        profileLink.click();
+                    }
+                }, 500);
+            }
+        }
+
         // Sidebar functionality
         document.addEventListener('DOMContentLoaded', function() {
             const sidebarToggle = document.getElementById('sidebarToggle');
@@ -780,6 +793,9 @@
             sidebarToggle?.addEventListener('click', toggleSidebar);
             sidebarClose?.addEventListener('click', closeSidebar);
             sidebarOverlay?.addEventListener('click', closeSidebar);
+
+            // Check for profile navigation on page load
+            handleProfileNavigation();
 
             // Handle sidebar navigation
             sidebarLinks.forEach(link => {

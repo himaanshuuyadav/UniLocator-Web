@@ -45,10 +45,10 @@ def dashboard():
                 "location": {"lat": 0.0, "lng": 0.0}
             }
             device_list.append(device_data)
-        return render_template('dashboard.html', devices=device_list, user_name='User')
+        return render_template('Dashboard.html', devices=device_list, user_name='User')
     except Exception as e:
         print(f"[DEBUG] Error loading dashboard: {e}")
-        return render_template('dashboard.html', devices=[], user_name='User', error="Failed to load dashboard. Please try again later."), 500
+        return render_template('Dashboard.html', devices=[], user_name='User', error="Failed to load dashboard. Please try again later."), 500
     finally:
         try:
             conn.close()
@@ -135,7 +135,7 @@ def register_page():
         print(f"Error serving register page: {e}")
         return "Error loading register page.", 500
 
-# Profile route: Only show if authenticated
+# Profile route: Redirect to dashboard since profile is now integrated
 @bp.route('/profile')
 def profile():
     # Use session for authentication
@@ -145,47 +145,8 @@ def profile():
         print("[DEBUG] /profile: Not authenticated, redirecting to landing page.")
         return redirect(url_for('main.index'))
     
-    try:
-        conn = sqlite3.connect('instance/unilocator.db')
-        cursor = conn.cursor()
-        
-        # Get user info if available
-        cursor.execute("""
-            SELECT firebase_uid, created_at
-            FROM users
-            WHERE firebase_uid = ?
-        """, (firebase_uid,))
-        user_data = cursor.fetchone()
-        
-        # Get device count for the user
-        cursor.execute("""
-            SELECT COUNT(*) FROM connected_devices WHERE user_id = ?
-        """, (firebase_uid,))
-        device_count = cursor.fetchone()[0]
-        
-        # Get recent device activity
-        cursor.execute("""
-            SELECT device_name, connected_at, last_latitude, last_longitude
-            FROM connected_devices 
-            WHERE user_id = ? 
-            ORDER BY connected_at DESC 
-            LIMIT 5
-        """, (firebase_uid,))
-        recent_activity = cursor.fetchall()
-        
-        conn.close()
-        
-        profile_data = {
-            'user_id': firebase_uid,
-            'created_at': user_data[1] if user_data else 'Unknown',
-            'device_count': device_count,
-            'recent_activity': recent_activity
-        }
-        
-        return render_template('profile.html', profile=profile_data)
-    except Exception as e:
-        print(f"[DEBUG] Error loading profile: {e}")
-        return redirect(url_for('main.dashboard'))
+    # Profile is now integrated into the dashboard, redirect there
+    return redirect(url_for('main.dashboard') + '#profile')
 
 # API endpoint for updating profile information
 @bp.route('/api/profile/update', methods=['POST'])
