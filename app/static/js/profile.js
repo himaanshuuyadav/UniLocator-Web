@@ -160,10 +160,10 @@ document.addEventListener('DOMContentLoaded', function() {
             shareProfileBtn.addEventListener('click', handleShareProfile);
         }
 
-        // Export data button
-        const exportDataBtn = document.getElementById('exportDataBtn');
-        if (exportDataBtn) {
-            exportDataBtn.addEventListener('click', handleExportData);
+        // Export data button (now in settings)
+        const dataExportBtn = document.getElementById('dataExportBtn');
+        if (dataExportBtn) {
+            dataExportBtn.addEventListener('click', handleExportData);
         }
 
         // Save changes button

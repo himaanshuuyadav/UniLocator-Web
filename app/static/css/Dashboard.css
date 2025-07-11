@@ -1249,6 +1249,22 @@ body {
     font-weight: 500;
 }
 
+/* Security actions in settings context */
+.settings-card .security-actions {
+    margin-top: 8px;
+}
+
+.settings-card .security-btn {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+}
+
+.settings-card .security-btn:hover {
+    background: var(--bg-light);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
 /* Enhanced Profile Actions */
 .reset-btn {
     display: flex;
@@ -1697,6 +1713,11 @@ html, body, .main-content, .sidebar, .content-wrapper {
 
     .security-btn {
         text-align: left;
+    }
+
+    .settings-card .security-btn {
+        padding: 14px;
+        font-size: 0.9rem;
     }
 }
 
