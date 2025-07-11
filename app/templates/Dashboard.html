@@ -253,18 +253,71 @@
                                     <div class="profile-avatar">
                                         <img src="../static/img/user-solid.svg" alt="User Avatar" id="userAvatar">
                                         <div class="status-indicator online" id="statusIndicator"></div>
+                                        <button class="avatar-upload-btn" id="avatarUploadBtn" title="Change Avatar">
+                                            <i class="fas fa-camera"></i>
+                                        </button>
                                     </div>
                                     <div class="profile-basic-info">
-                                        <h2 class="profile-name" id="profileName">John Doe</h2>
+                                        <h2 class="profile-name" id="profileName">Loading...</h2>
                                         <div class="profile-tagline-wrapper">
-                                            <input type="text" class="profile-tagline" id="profileTagline" value="Explorer of cities 🌆" placeholder="Add a tagline...">
+                                            <input type="text" class="profile-tagline" id="profileTagline" value="Add your tagline here..." placeholder="Add a tagline...">
+                                        </div>
+                                        <div class="profile-joined">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span id="joinedDate">Member since 2024</span>
                                         </div>
                                     </div>
                                 </div>
-                                <button class="share-profile-btn" id="shareProfileBtn">
-                                    <i class="fas fa-share-alt"></i>
-                                    Share Profile
-                                </button>
+                                <div class="profile-actions-header">
+                                    <button class="share-profile-btn" id="shareProfileBtn">
+                                        <i class="fas fa-share-alt"></i>
+                                        Share Profile
+                                    </button>
+                                    <button class="export-data-btn" id="exportDataBtn">
+                                        <i class="fas fa-download"></i>
+                                        Export Data
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Profile Stats Cards -->
+                            <div class="profile-stats-grid">
+                                <div class="profile-stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-mobile-alt"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <span class="stat-number" id="totalDevices">0</span>
+                                        <span class="stat-label">Connected Devices</span>
+                                    </div>
+                                </div>
+                                <div class="profile-stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <span class="stat-number" id="locationsTracked">0</span>
+                                        <span class="stat-label">Locations Tracked</span>
+                                    </div>
+                                </div>
+                                <div class="profile-stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-calendar-day"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <span class="stat-number" id="accountAge">0</span>
+                                        <span class="stat-label">Days Active</span>
+                                    </div>
+                                </div>
+                                <div class="profile-stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <span class="stat-number" id="groupsJoined">0</span>
+                                        <span class="stat-label">Groups Joined</span>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Profile Content Grid -->
@@ -276,64 +329,125 @@
                                         Personal Information
                                     </h3>
                                     <form class="profile-form" id="profileForm">
-                                        <div class="form-group">
-                                            <label for="firstName">First Name</label>
-                                            <input type="text" id="firstName" name="firstName" value="John" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="lastName">Last Name</label>
-                                            <input type="text" id="lastName" name="lastName" value="Doe" required>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="firstName">First Name</label>
+                                                <input type="text" id="firstName" name="firstName" placeholder="Enter first name" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="lastName">Last Name</label>
+                                                <input type="text" id="lastName" name="lastName" placeholder="Enter last name" required>
+                                            </div>
                                         </div>
                                         <div class="form-group">
                                             <label for="email">Email Address</label>
-                                            <input type="email" id="email" name="email" value="john.doe@example.com" required>
+                                            <input type="email" id="email" name="email" placeholder="Enter email address" required>
+                                            <small class="form-help">This email is managed by your Firebase account</small>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="bio">Bio</label>
+                                            <textarea id="bio" name="bio" placeholder="Tell us about yourself..." rows="3"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="location">Location</label>
+                                            <input type="text" id="location" name="location" placeholder="City, Country">
                                         </div>
                                     </form>
                                 </div>
 
-                                <!-- Account Summary Section -->
+                                <!-- Recent Activity Section -->
                                 <div class="profile-section">
                                     <h3 class="section-title">
-                                        <i class="fas fa-chart-bar"></i>
-                                        Account Summary
+                                        <i class="fas fa-history"></i>
+                                        Recent Activity
                                     </h3>
-                                    <div class="account-stats">
-                                        <div class="stat-card">
-                                            <div class="stat-icon">
-                                                <i class="fas fa-user"></i>
+                                    <div class="activity-list" id="activityList">
+                                        <div class="activity-item loading">
+                                            <div class="activity-icon">
+                                                <i class="fas fa-spinner fa-spin"></i>
                                             </div>
-                                            <div class="stat-info">
-                                                <span class="stat-label">Username</span>
-                                                <span class="stat-value">@johndoe</span>
-                                            </div>
-                                        </div>
-                                        <div class="stat-card">
-                                            <div class="stat-icon">
-                                                <i class="fas fa-mobile-alt"></i>
-                                            </div>
-                                            <div class="stat-info">
-                                                <span class="stat-label">Linked Devices</span>
-                                                <span class="stat-value">{{ devices|length if devices else 0 }}</span>
-                                            </div>
-                                        </div>
-                                        <div class="stat-card">
-                                            <div class="stat-icon">
-                                                <i class="fas fa-users"></i>
-                                            </div>
-                                            <div class="stat-info">
-                                                <span class="stat-label">Groups Joined</span>
-                                                <span class="stat-value">3</span>
+                                            <div class="activity-content">
+                                                <div class="activity-text">Loading recent activity...</div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Preferences Section -->
+                                <div class="profile-section">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-cog"></i>
+                                        Preferences
+                                    </h3>
+                                    <div class="preferences-list">
+                                        <div class="preference-item">
+                                            <div class="preference-info">
+                                                <span class="preference-label">Dark Mode</span>
+                                                <small class="preference-desc">Enable dark theme across the application</small>
+                                            </div>
+                                            <label class="switch">
+                                                <input type="checkbox" id="darkModeToggle" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                        <div class="preference-item">
+                                            <div class="preference-info">
+                                                <span class="preference-label">Email Notifications</span>
+                                                <small class="preference-desc">Receive device alerts via email</small>
+                                            </div>
+                                            <label class="switch">
+                                                <input type="checkbox" id="emailNotificationsToggle" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                        <div class="preference-item">
+                                            <div class="preference-info">
+                                                <span class="preference-label">Auto-refresh Dashboard</span>
+                                                <small class="preference-desc">Automatically update device status</small>
+                                            </div>
+                                            <label class="switch">
+                                                <input type="checkbox" id="autoRefreshToggle" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Security Section -->
+                                <div class="profile-section">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-shield-alt"></i>
+                                        Security & Privacy
+                                    </h3>
+                                    <div class="security-actions">
+                                        <button class="security-btn" id="changePasswordBtn">
+                                            <i class="fas fa-key"></i>
+                                            <span>Change Password</span>
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <button class="security-btn" id="twoFactorBtn">
+                                            <i class="fas fa-mobile-alt"></i>
+                                            <span>Two-Factor Authentication</span>
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <button class="security-btn" id="privacySettingsBtn">
+                                            <i class="fas fa-user-secret"></i>
+                                            <span>Privacy Settings</span>
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- Save Changes Button -->
+                            <!-- Profile Actions -->
                             <div class="profile-actions">
                                 <button class="save-changes-btn" id="saveChangesBtn">
                                     <i class="fas fa-save"></i>
                                     Save Changes
+                                </button>
+                                <button class="reset-btn" id="resetChangesBtn">
+                                    <i class="fas fa-undo"></i>
+                                    Reset Changes
                                 </button>
                             </div>
                         </div>
@@ -530,7 +644,8 @@
         loadQRCode();
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/Dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 
     <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>

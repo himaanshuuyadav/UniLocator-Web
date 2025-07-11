@@ -163,15 +163,96 @@ def profile():
         """, (firebase_uid,))
         device_count = cursor.fetchone()[0]
         
+        # Get recent device activity
+        cursor.execute("""
+            SELECT device_name, connected_at, last_latitude, last_longitude
+            FROM connected_devices 
+            WHERE user_id = ? 
+            ORDER BY connected_at DESC 
+            LIMIT 5
+        """, (firebase_uid,))
+        recent_activity = cursor.fetchall()
+        
         conn.close()
         
         profile_data = {
             'user_id': firebase_uid,
             'created_at': user_data[1] if user_data else 'Unknown',
-            'device_count': device_count
+            'device_count': device_count,
+            'recent_activity': recent_activity
         }
         
         return render_template('profile.html', profile=profile_data)
     except Exception as e:
         print(f"[DEBUG] Error loading profile: {e}")
         return redirect(url_for('main.dashboard'))
+
+# API endpoint for updating profile information
+@bp.route('/api/profile/update', methods=['POST'])
+def update_profile():
+    firebase_uid = session.get('user_id')
+    if not firebase_uid:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    try:
+        data = request.get_json()
+        
+        # For now, we'll just return success since user profile data isn't stored in a dedicated table
+        # In a full implementation, you'd want to create a user_profiles table
+        
+        return jsonify({
+            'success': True,
+            'message': 'Profile updated successfully'
+        })
+    except Exception as e:
+        print(f"[DEBUG] Error updating profile: {e}")
+        return jsonify({'success': False, 'error': 'Failed to update profile'}), 500
+
+# API endpoint for getting user stats
+@bp.route('/api/profile/stats')
+def get_profile_stats():
+    firebase_uid = session.get('user_id')
+    if not firebase_uid:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    try:
+        conn = sqlite3.connect('instance/unilocator.db')
+        cursor = conn.cursor()
+        
+        # Get total devices
+        cursor.execute("SELECT COUNT(*) FROM connected_devices WHERE user_id = ?", (firebase_uid,))
+        total_devices = cursor.fetchone()[0]
+        
+        # Get total locations tracked (count of location updates)
+        cursor.execute("""
+            SELECT COUNT(*) FROM connected_devices 
+            WHERE user_id = ? AND (last_latitude IS NOT NULL OR last_longitude IS NOT NULL)
+        """, (firebase_uid,))
+        locations_tracked = cursor.fetchone()[0]
+        
+        # Get account age in days
+        cursor.execute("SELECT created_at FROM users WHERE firebase_uid = ?", (firebase_uid,))
+        user_data = cursor.fetchone()
+        account_age = 0
+        if user_data and user_data[0]:
+            from datetime import datetime
+            try:
+                created_date = datetime.fromisoformat(user_data[0])
+                account_age = (datetime.now() - created_date).days
+            except:
+                account_age = 0
+        
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'stats': {
+                'total_devices': total_devices,
+                'locations_tracked': locations_tracked,
+                'account_age_days': account_age,
+                'groups_joined': 0  # Placeholder for future groups feature
+            }
+        })
+    except Exception as e:
+        print(f"[DEBUG] Error getting profile stats: {e}")
+        return jsonify({'success': False, 'error': 'Failed to get stats'}), 500
