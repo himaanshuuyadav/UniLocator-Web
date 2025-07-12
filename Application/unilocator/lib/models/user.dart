@@ -109,4 +109,66 @@ class AppUser {
       updatedAt: DateTime.now(),
     );
   }
+
+  // Helper methods
+  String get statusText {
+    if (isOnline) {
+      return 'Online';
+    } else if (lastSeen != null) {
+      final difference = DateTime.now().difference(lastSeen!);
+      if (difference.inMinutes < 1) {
+        return 'Just now';
+      } else if (difference.inMinutes < 60) {
+        return '${difference.inMinutes}m ago';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours}h ago';
+      } else {
+        return '${difference.inDays}d ago';
+      }
+    }
+    return 'Never seen';
+  }
+
+  String get locationText {
+    if (address != null && address!.isNotEmpty) {
+      return address!;
+    } else if (latitude != null && longitude != null) {
+      return '${latitude!.toStringAsFixed(4)}, ${longitude!.toStringAsFixed(4)}';
+    }
+    return 'No location';
+  }
+
+  bool get hasLocation => latitude != null && longitude != null;
+
+  String get initials {
+    if (username.isEmpty) return 'U';
+    final words = username.split(' ');
+    if (words.length == 1) {
+      return words[0].substring(0, 1).toUpperCase();
+    } else {
+      return (words[0].substring(0, 1) + words[1].substring(0, 1)).toUpperCase();
+    }
+  }
+
+  String get locationUpdateIntervalText {
+    if (locationUpdateInterval < 60) {
+      return '${locationUpdateInterval}s';
+    } else {
+      final minutes = locationUpdateInterval ~/ 60;
+      return '${minutes}m';
+    }
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AppUser && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  String toString() {
+    return 'AppUser{id: $id, username: $username, email: $email, isOnline: $isOnline}';
+  }
 }

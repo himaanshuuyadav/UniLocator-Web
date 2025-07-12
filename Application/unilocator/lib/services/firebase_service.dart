@@ -1,10 +1,10 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../models/user.dart';
 import '../models/device.dart';
 import '../models/friend.dart';
-import 'dart:io';
 
 class FirebaseService {
   static final FirebaseService _instance = FirebaseService._internal();
@@ -58,7 +58,7 @@ class FirebaseService {
     } on FirebaseAuthException catch (e) {
       return {'success': false, 'error': _getAuthErrorMessage(e.code)};
     } catch (e) {
-      return {'success': false, 'error': 'An unexpected error occurred'};
+      return {'success': false, 'error': 'An unexpected error occurred: $e'};
     }
   }
 
@@ -84,7 +84,7 @@ class FirebaseService {
     } on FirebaseAuthException catch (e) {
       return {'success': false, 'error': _getAuthErrorMessage(e.code)};
     } catch (e) {
-      return {'success': false, 'error': 'An unexpected error occurred'};
+      return {'success': false, 'error': 'An unexpected error occurred: $e'};
     }
   }
 
@@ -237,27 +237,6 @@ class FirebaseService {
     }
   }
 
-  Future<bool> updateDeviceLocation({
-    required String deviceId,
-    required double latitude,
-    required double longitude,
-    String? address,
-  }) async {
-    try {
-      await _devicesCollection.doc(deviceId).update({
-        'latitude': latitude,
-        'longitude': longitude,
-        'address': address,
-        'lastSeen': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-      return true;
-    } catch (e) {
-      print('Error updating device location: $e');
-      return false;
-    }
-  }
-
   // Friend Methods
   Future<List<Friend>> getUserFriends() async {
     if (currentUser == null) return [];
@@ -399,6 +378,19 @@ class FirebaseService {
     }
   }
 
+  Future<bool> toggleLocationSharing(String friendId, bool isSharing) async {
+    try {
+      await _friendsCollection.doc(friendId).update({
+        'isLocationShared': isSharing,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      return true;
+    } catch (e) {
+      print('Error toggling location sharing: $e');
+      return false;
+    }
+  }
+
   // Utility Methods
   String _getAuthErrorMessage(String code) {
     switch (code) {
@@ -416,29 +408,39 @@ class FirebaseService {
         return 'This user account has been disabled.';
       case 'too-many-requests':
         return 'Too many attempts. Please try again later.';
+      case 'operation-not-allowed':
+        return 'Email/password accounts are not enabled.';
+      case 'invalid-credential':
+        return 'The provided credentials are invalid.';
       default:
         return 'An error occurred. Please try again.';
     }
   }
 
-  // Real-time location updates
-  Future<void> startLocationUpdates() async {
+  // Real-time status updates
+  Future<void> setUserOnlineStatus(bool isOnline) async {
     if (currentUser == null) return;
 
-    // This would typically be called from a location service
-    // to update the user's location in real-time
     await _usersCollection.doc(currentUser!.uid).update({
-      'isOnline': true,
+      'isOnline': isOnline,
       'lastSeen': FieldValue.serverTimestamp(),
     });
   }
 
-  Future<void> stopLocationUpdates() async {
-    if (currentUser == null) return;
+  // Search users by email
+  Future<AppUser?> findUserByEmail(String email) async {
+    try {
+      QuerySnapshot snapshot = await _usersCollection
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
 
-    await _usersCollection.doc(currentUser!.uid).update({
-      'isOnline': false,
-      'lastSeen': FieldValue.serverTimestamp(),
-    });
+      if (snapshot.docs.isNotEmpty) {
+        return AppUser.fromFirestore(snapshot.docs.first);
+      }
+    } catch (e) {
+      print('Error finding user by email: $e');
+    }
+    return null;
   }
 }

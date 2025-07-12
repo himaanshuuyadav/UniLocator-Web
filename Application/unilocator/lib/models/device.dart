@@ -1,5 +1,48 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum DeviceType {
+  phone,
+  tablet,
+  laptop,
+  watch,
+  earbuds,
+  other;
+
+  String get displayName {
+    switch (this) {
+      case DeviceType.phone:
+        return 'Phone';
+      case DeviceType.tablet:
+        return 'Tablet';
+      case DeviceType.laptop:
+        return 'Laptop';
+      case DeviceType.watch:
+        return 'Watch';
+      case DeviceType.earbuds:
+        return 'Earbuds';
+      case DeviceType.other:
+        return 'Other';
+    }
+  }
+
+  String get iconName {
+    switch (this) {
+      case DeviceType.phone:
+        return 'phone_android';
+      case DeviceType.tablet:
+        return 'tablet';
+      case DeviceType.laptop:
+        return 'laptop';
+      case DeviceType.watch:
+        return 'watch';
+      case DeviceType.earbuds:
+        return 'headphones';
+      case DeviceType.other:
+        return 'device_unknown';
+    }
+  }
+}
+
 class Device {
   final String id;
   final String name;
@@ -41,7 +84,7 @@ class Device {
       userId: data['userId'] ?? '',
       type: DeviceType.values.firstWhere(
         (e) => e.name == data['type'],
-        orElse: () => DeviceType.phone,
+        orElse: () => DeviceType.other,
       ),
       isOnline: data['isOnline'] ?? false,
       latitude: data['latitude']?.toDouble(),
@@ -105,30 +148,52 @@ class Device {
       updatedAt: DateTime.now(),
     );
   }
-}
 
-enum DeviceType {
-  phone,
-  tablet,
-  laptop,
-  watch,
-  earbuds,
-  other;
-
-  String get displayName {
-    switch (this) {
-      case DeviceType.phone:
-        return 'Phone';
-      case DeviceType.tablet:
-        return 'Tablet';
-      case DeviceType.laptop:
-        return 'Laptop';
-      case DeviceType.watch:
-        return 'Watch';
-      case DeviceType.earbuds:
-        return 'Earbuds';
-      case DeviceType.other:
-        return 'Other';
+  // Helper methods
+  String get statusText {
+    if (isOnline) {
+      return 'Online';
+    } else if (lastSeen != null) {
+      final difference = DateTime.now().difference(lastSeen!);
+      if (difference.inMinutes < 1) {
+        return 'Just now';
+      } else if (difference.inMinutes < 60) {
+        return '${difference.inMinutes}m ago';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours}h ago';
+      } else {
+        return '${difference.inDays}d ago';
+      }
     }
+    return 'Never seen';
+  }
+
+  String get batteryText {
+    if (batteryLevel == null) return 'Unknown';
+    return '$batteryLevel%';
+  }
+
+  String get locationText {
+    if (address != null && address!.isNotEmpty) {
+      return address!;
+    } else if (latitude != null && longitude != null) {
+      return '${latitude!.toStringAsFixed(4)}, ${longitude!.toStringAsFixed(4)}';
+    }
+    return 'No location';
+  }
+
+  bool get hasLocation => latitude != null && longitude != null;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Device && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  String toString() {
+    return 'Device{id: $id, name: $name, type: $type, isOnline: $isOnline}';
   }
 }

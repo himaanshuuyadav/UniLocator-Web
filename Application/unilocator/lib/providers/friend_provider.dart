@@ -1,11 +1,9 @@
-import 'package:flutter/foundation.dart';
-import '../models/friend.dart';
+import 'package:flutter/material.dart';
 import '../services/firebase_service.dart';
-import '../services/location_service.dart';
+import '../models/friend.dart';
 
 class FriendProvider extends ChangeNotifier {
   final FirebaseService _firebaseService = FirebaseService();
-  final LocationService _locationService = LocationService();
 
   List<Friend> _friends = [];
   List<Friend> _pendingRequests = [];
@@ -23,20 +21,38 @@ class FriendProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   Friend? get selectedFriend => _selectedFriend;
+  int get friendCount => _friends.length;
+  int get pendingRequestCount => _pendingRequests.length;
 
-  // Initialize and fetch friends
-  Future<void> initialize() async {
+  // Initialize and start listening to real-time updates
+  void initialize() {
+    startListening();
+    loadFriends();
+    loadPendingRequests();
+  }
+
+  // Load friends from Firebase
+  Future<void> loadFriends() async {
     _setLoading(true);
     try {
-      await Future.wait([
-        _fetchFriends(),
-        _fetchPendingRequests(),
-      ]);
+      _friends = await _firebaseService.getUserFriends();
       _error = null;
     } catch (e) {
       _error = 'Failed to load friends: $e';
     } finally {
       _setLoading(false);
+    }
+  }
+
+  // Load pending friend requests
+  Future<void> loadPendingRequests() async {
+    try {
+      _pendingRequests = await _firebaseService.getPendingFriendRequests();
+      _error = null;
+      notifyListeners();
+    } catch (e) {
+      _error = 'Failed to load pending requests: $e';
+      notifyListeners();
     }
   }
 
@@ -55,33 +71,22 @@ class FriendProvider extends ChangeNotifier {
     );
   }
 
-  // Fetch friends
-  Future<void> _fetchFriends() async {
-    _friends = await _firebaseService.getUserFriends();
-  }
-
-  // Fetch pending friend requests
-  Future<void> _fetchPendingRequests() async {
-    _pendingRequests = await _firebaseService.getPendingFriendRequests();
-  }
-
   // Send friend request
   Future<bool> sendFriendRequest(String friendEmail) async {
     _setLoading(true);
     try {
-      bool success = await _firebaseService.sendFriendRequest(friendEmail);
+      final success = await _firebaseService.sendFriendRequest(friendEmail);
       if (success) {
         _error = null;
-        notifyListeners();
+        // Refresh pending requests
+        await loadPendingRequests();
         return true;
       } else {
         _error = 'Failed to send friend request. User not found or request already exists.';
-        notifyListeners();
         return false;
       }
     } catch (e) {
       _error = 'Error sending friend request: $e';
-      notifyListeners();
       return false;
     } finally {
       _setLoading(false);
@@ -92,23 +97,21 @@ class FriendProvider extends ChangeNotifier {
   Future<bool> acceptFriendRequest(String friendRequestId) async {
     _setLoading(true);
     try {
-      bool success = await _firebaseService.acceptFriendRequest(friendRequestId);
+      final success = await _firebaseService.acceptFriendRequest(friendRequestId);
       if (success) {
         // Remove from pending requests
         _pendingRequests.removeWhere((f) => f.id == friendRequestId);
         // Refresh friends list
-        await _fetchFriends();
+        await loadFriends();
         _error = null;
         notifyListeners();
         return true;
       } else {
         _error = 'Failed to accept friend request';
-        notifyListeners();
         return false;
       }
     } catch (e) {
       _error = 'Error accepting friend request: $e';
-      notifyListeners();
       return false;
     } finally {
       _setLoading(false);
@@ -119,7 +122,7 @@ class FriendProvider extends ChangeNotifier {
   Future<bool> rejectFriendRequest(String friendRequestId) async {
     _setLoading(true);
     try {
-      bool success = await _firebaseService.rejectFriendRequest(friendRequestId);
+      final success = await _firebaseService.rejectFriendRequest(friendRequestId);
       if (success) {
         _pendingRequests.removeWhere((f) => f.id == friendRequestId);
         _error = null;
@@ -127,12 +130,10 @@ class FriendProvider extends ChangeNotifier {
         return true;
       } else {
         _error = 'Failed to reject friend request';
-        notifyListeners();
         return false;
       }
     } catch (e) {
       _error = 'Error rejecting friend request: $e';
-      notifyListeners();
       return false;
     } finally {
       _setLoading(false);
@@ -143,7 +144,7 @@ class FriendProvider extends ChangeNotifier {
   Future<bool> removeFriend(String friendId) async {
     _setLoading(true);
     try {
-      bool success = await _firebaseService.removeFriend(friendId);
+      final success = await _firebaseService.removeFriend(friendId);
       if (success) {
         _friends.removeWhere((f) => f.id == friendId);
         if (_selectedFriend?.id == friendId) {
@@ -154,12 +155,10 @@ class FriendProvider extends ChangeNotifier {
         return true;
       } else {
         _error = 'Failed to remove friend';
-        notifyListeners();
         return false;
       }
     } catch (e) {
       _error = 'Error removing friend: $e';
-      notifyListeners();
       return false;
     } finally {
       _setLoading(false);
@@ -169,12 +168,14 @@ class FriendProvider extends ChangeNotifier {
   // Toggle friend favorite status
   Future<bool> toggleFriendFavorite(String friendId) async {
     try {
-      Friend? friend = _friends.firstWhere((f) => f.id == friendId);
-      bool newFavoriteStatus = !friend.isFavorite;
+      final friend = getFriendById(friendId);
+      if (friend == null) return false;
+
+      final newFavoriteStatus = !friend.isFavorite;
       
-      bool success = await _firebaseService.toggleFriendFavorite(friendId, newFavoriteStatus);
+      final success = await _firebaseService.toggleFriendFavorite(friendId, newFavoriteStatus);
       if (success) {
-        int index = _friends.indexWhere((f) => f.id == friendId);
+        final index = _friends.indexWhere((f) => f.id == friendId);
         if (index != -1) {
           _friends[index] = friend.copyWith(isFavorite: newFavoriteStatus);
           if (_selectedFriend?.id == friendId) {
@@ -186,10 +187,39 @@ class FriendProvider extends ChangeNotifier {
         }
       }
       _error = 'Failed to update favorite status';
-      notifyListeners();
       return false;
     } catch (e) {
       _error = 'Error toggling favorite status: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Toggle location sharing with friend
+  Future<bool> toggleLocationSharing(String friendId) async {
+    try {
+      final friend = getFriendById(friendId);
+      if (friend == null) return false;
+
+      final newSharingStatus = !friend.isLocationShared;
+      
+      final success = await _firebaseService.toggleLocationSharing(friendId, newSharingStatus);
+      if (success) {
+        final index = _friends.indexWhere((f) => f.id == friendId);
+        if (index != -1) {
+          _friends[index] = friend.copyWith(isLocationShared: newSharingStatus);
+          if (_selectedFriend?.id == friendId) {
+            _selectedFriend = _friends[index];
+          }
+          _error = null;
+          notifyListeners();
+          return true;
+        }
+      }
+      _error = 'Failed to update location sharing';
+      return false;
+    } catch (e) {
+      _error = 'Error toggling location sharing: $e';
       notifyListeners();
       return false;
     }
@@ -216,59 +246,30 @@ class FriendProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Get friends near a location
-  List<Friend> getFriendsNearLocation(
-    double latitude,
-    double longitude,
-    double radiusInMeters,
-  ) {
-    return _friends.where((friend) {
-      if (friend.latitude == null || friend.longitude == null || !friend.isLocationShared) {
-        return false;
-      }
-      double distance = _locationService.calculateDistance(
-        latitude,
-        longitude,
-        friend.latitude!,
-        friend.longitude!,
-      );
-      return distance <= radiusInMeters;
-    }).toList();
+  // Get friends with location
+  List<Friend> getFriendsWithLocation() {
+    return _friends.where((f) => f.hasLocation && f.isLocationShared).toList();
   }
 
-  // Get distance to friend
-  double? getDistanceToFriend(String friendId) {
-    if (_locationService.currentLocation == null) return null;
+  // Search friends
+  List<Friend> searchFriends(String query) {
+    if (query.isEmpty) return _friends;
     
-    Friend? friend = getFriendById(friendId);
-    if (friend == null || friend.latitude == null || friend.longitude == null) {
-      return null;
-    }
-
-    return _locationService.calculateDistance(
-      _locationService.currentLocation!.latitude!,
-      _locationService.currentLocation!.longitude!,
-      friend.latitude!,
-      friend.longitude!,
-    );
-  }
-
-  // Get formatted distance to friend
-  String? getFormattedDistanceToFriend(String friendId) {
-    double? distance = getDistanceToFriend(friendId);
-    if (distance == null) return null;
-    return _locationService.formatDistance(distance);
+    return _friends.where((friend) {
+      return friend.name.toLowerCase().contains(query.toLowerCase()) ||
+             friend.email.toLowerCase().contains(query.toLowerCase());
+    }).toList();
   }
 
   // Get friends online status summary
   Map<String, int> getOnlineStatusSummary() {
-    Map<String, int> summary = {
+    final Map<String, int> summary = {
       'online': 0,
       'offline': 0,
       'total': _friends.length,
     };
 
-    for (Friend friend in _friends) {
+    for (final friend in _friends) {
       if (friend.isOnline) {
         summary['online'] = summary['online']! + 1;
       } else {
@@ -281,13 +282,13 @@ class FriendProvider extends ChangeNotifier {
 
   // Get location sharing summary
   Map<String, int> getLocationSharingSummary() {
-    Map<String, int> summary = {
+    final Map<String, int> summary = {
       'sharing': 0,
       'notSharing': 0,
       'total': _friends.length,
     };
 
-    for (Friend friend in _friends) {
+    for (final friend in _friends) {
       if (friend.isLocationShared) {
         summary['sharing'] = summary['sharing']! + 1;
       } else {
@@ -298,19 +299,9 @@ class FriendProvider extends ChangeNotifier {
     return summary;
   }
 
-  // Search friends by name or email
-  List<Friend> searchFriends(String query) {
-    if (query.isEmpty) return _friends;
-    
-    return _friends.where((friend) {
-      return friend.name.toLowerCase().contains(query.toLowerCase()) ||
-             friend.email.toLowerCase().contains(query.toLowerCase());
-    }).toList();
-  }
-
   // Sort friends by various criteria
   List<Friend> sortFriends(String sortBy) {
-    List<Friend> sortedFriends = List.from(_friends);
+    final List<Friend> sortedFriends = List.from(_friends);
     
     switch (sortBy) {
       case 'name':
@@ -322,17 +313,6 @@ class FriendProvider extends ChangeNotifier {
           if (b.lastSeen == null) return -1;
           return b.lastSeen!.compareTo(a.lastSeen!);
         });
-        break;
-      case 'distance':
-        if (_locationService.currentLocation != null) {
-          sortedFriends.sort((a, b) {
-            double? distanceA = getDistanceToFriend(a.id);
-            double? distanceB = getDistanceToFriend(b.id);
-            if (distanceA == null) return 1;
-            if (distanceB == null) return -1;
-            return distanceA.compareTo(distanceB);
-          });
-        }
         break;
       case 'favorite':
         sortedFriends.sort((a, b) {
@@ -353,9 +333,22 @@ class FriendProvider extends ChangeNotifier {
     return sortedFriends;
   }
 
+  // Get recently active friends
+  List<Friend> getRecentlyActiveFriends({int hours = 24}) {
+    final cutoffTime = DateTime.now().subtract(Duration(hours: hours));
+    
+    return _friends.where((friend) {
+      return friend.isOnline || 
+             (friend.lastSeen != null && friend.lastSeen!.isAfter(cutoffTime));
+    }).toList();
+  }
+
   // Refresh friends and requests
   Future<void> refreshFriends() async {
-    await initialize();
+    await Future.wait([
+      loadFriends(),
+      loadPendingRequests(),
+    ]);
   }
 
   // Clear error
@@ -368,37 +361,6 @@ class FriendProvider extends ChangeNotifier {
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
-  }
-
-  // Format last seen time
-  String formatLastSeen(DateTime? lastSeen) {
-    if (lastSeen == null) return 'Never';
-
-    final now = DateTime.now();
-    final difference = now.difference(lastSeen);
-
-    if (difference.inMinutes < 1) {
-      return 'Just now';
-    } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes} min ago';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours} hr ago';
-    } else {
-      return '${difference.inDays} days ago';
-    }
-  }
-
-  // Get friend status color
-  String getFriendStatusColor(Friend friend) {
-    if (friend.isOnline) {
-      return '#4CAF50'; // Green
-    } else if (friend.lastSeen != null) {
-      final difference = DateTime.now().difference(friend.lastSeen!);
-      if (difference.inHours < 24) {
-        return '#FF9800'; // Orange
-      }
-    }
-    return '#888888'; // Gray
   }
 
   @override

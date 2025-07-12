@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
+  // Color Constants
   static const Color primaryGreen = Color(0xFF037d3a);
   static const Color darkBackground = Color(0xFF000000);
   static const Color cardBackground = Color(0xFF1a1a1a);
@@ -11,6 +12,8 @@ class AppTheme {
   static const Color errorColor = Color(0xFFF44336);
   static const Color warningColor = Color(0xFFFF9800);
   static const Color successColor = Color(0xFF4CAF50);
+  static const Color onlineColor = Color(0xFF4CAF50);
+  static const Color offlineColor = Color(0xFF888888);
 
   static ThemeData get darkTheme {
     return ThemeData(
@@ -43,8 +46,8 @@ class AppTheme {
         scrolledUnderElevation: 2,
         shadowColor: primaryGreen.withOpacity(0.3),
         titleTextStyle: GoogleFonts.inter(
-          color: primaryGreen,
-          fontSize: 20,
+          color: Colors.white,
+          fontSize: 22,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.15,
         ),
@@ -56,6 +59,7 @@ class AppTheme {
           color: primaryGreen,
           size: 24,
         ),
+        centerTitle: false,
       ),
       
       // Card
@@ -64,9 +68,9 @@ class AppTheme {
         elevation: 2,
         shadowColor: primaryGreen.withOpacity(0.1),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
-        margin: const EdgeInsets.all(8),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
       
       // Elevated Button
@@ -113,6 +117,15 @@ class AppTheme {
         ),
       ),
       
+      // Floating Action Button
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: primaryGreen,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        highlightElevation: 8,
+        shape: CircleBorder(),
+      ),
+      
       // Input Decoration
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -151,6 +164,27 @@ class AppTheme {
           borderSide: const BorderSide(color: errorColor, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
+      
+      // Bottom Navigation Bar
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: cardBackground,
+        elevation: 8,
+        selectedItemColor: primaryGreen,
+        unselectedItemColor: textSecondary,
+        selectedLabelStyle: GoogleFonts.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
+        unselectedLabelStyle: GoogleFonts.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.5,
+        ),
+        type: BottomNavigationBarType.fixed,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
       ),
       
       // Text Theme
@@ -247,39 +281,27 @@ class AppTheme {
         ),
       ),
       
-      // Bottom Navigation Bar
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: cardBackground,
-        elevation: 8,
-        selectedItemColor: primaryGreen,
-        unselectedItemColor: textSecondary,
-        selectedLabelStyle: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
-        unselectedLabelStyle: GoogleFonts.inter(
-          fontSize: 12,
+      // List Tile
+      listTileTheme: ListTileThemeData(
+        tileColor: Colors.transparent,
+        selectedTileColor: primaryGreen.withOpacity(0.1),
+        iconColor: primaryGreen,
+        textColor: Colors.white,
+        selectedColor: primaryGreen,
+        titleTextStyle: GoogleFonts.inter(
+          fontSize: 16,
           fontWeight: FontWeight.w500,
-          letterSpacing: 0.5,
+          color: Colors.white,
         ),
-        type: BottomNavigationBarType.fixed,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-      ),
-      
-      // Divider
-      dividerTheme: const DividerThemeData(
-        color: dividerColor,
-        thickness: 1,
-      ),
-      
-      // Floating Action Button
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: primaryGreen,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        highlightElevation: 8,
+        subtitleTextStyle: GoogleFonts.inter(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: textSecondary,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
       
       // Switch
@@ -298,40 +320,32 @@ class AppTheme {
         }),
       ),
       
-      // Slider
-      sliderTheme: SliderThemeData(
-        activeTrackColor: primaryGreen,
-        inactiveTrackColor: surfaceColor,
-        thumbColor: primaryGreen,
-        overlayColor: primaryGreen.withOpacity(0.2),
-        valueIndicatorColor: primaryGreen,
-        valueIndicatorTextStyle: GoogleFonts.inter(
+      // Chip
+      chipTheme: ChipThemeData(
+        backgroundColor: cardBackground,
+        selectedColor: primaryGreen.withOpacity(0.2),
+        disabledColor: surfaceColor,
+        labelStyle: GoogleFonts.inter(
           color: Colors.white,
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: FontWeight.w500,
+        ),
+        secondaryLabelStyle: GoogleFonts.inter(
+          color: primaryGreen,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
         ),
       ),
       
-      // Checkbox
-      checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
-            return primaryGreen;
-          }
-          return Colors.transparent;
-        }),
-        checkColor: MaterialStateProperty.all(Colors.white),
-        side: const BorderSide(color: primaryGreen),
-      ),
-      
-      // Radio
-      radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
-            return primaryGreen;
-          }
-          return textSecondary;
-        }),
+      // Divider
+      dividerTheme: const DividerThemeData(
+        color: dividerColor,
+        thickness: 1,
+        space: 1,
       ),
       
       // Progress Indicator
@@ -375,56 +389,37 @@ class AppTheme {
           color: Colors.white,
         ),
       ),
-      
-      // List Tile
-      listTileTheme: ListTileThemeData(
-        tileColor: Colors.transparent,
-        selectedTileColor: primaryGreen.withOpacity(0.1),
-        iconColor: primaryGreen,
-        textColor: Colors.white,
-        selectedColor: primaryGreen,
-        titleTextStyle: GoogleFonts.inter(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: Colors.white,
-        ),
-        subtitleTextStyle: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          color: textSecondary,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      ),
     );
   }
   
-  static ThemeData get lightTheme {
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.light,
-      fontFamily: GoogleFonts.inter().fontFamily,
-      
-      colorScheme: const ColorScheme.light(
-        primary: primaryGreen,
-        secondary: Color(0xFFE8F5E8),
-        surface: Colors.white,
-        background: Color(0xFFF5F5F5),
-        onBackground: Color(0xFF1A1A1A),
-        onSurface: Color(0xFF1A1A1A),
-        onPrimary: Colors.white,
-        error: errorColor,
-        onError: Colors.white,
-        outline: Color(0xFFE0E0E0),
-        outlineVariant: Color(0xFFF0F0F0),
-      ),
-      
-      scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-      
-      // Override other theme properties for light theme as needed
-      // This is a basic light theme setup - you can expand it further
-    );
+  // Utility methods for consistent spacing
+  static const double paddingSmall = 8.0;
+  static const double paddingMedium = 16.0;
+  static const double paddingLarge = 24.0;
+  static const double borderRadius = 12.0;
+  static const double borderRadiusSmall = 8.0;
+  static const double borderRadiusLarge = 16.0;
+  
+  // Device type colors
+  static Color getDeviceTypeColor(String deviceType) {
+    switch (deviceType.toLowerCase()) {
+      case 'phone':
+        return const Color(0xFF2196F3);
+      case 'tablet':
+        return const Color(0xFF9C27B0);
+      case 'laptop':
+        return const Color(0xFFFF9800);
+      case 'watch':
+        return const Color(0xFFE91E63);
+      case 'earbuds':
+        return const Color(0xFF00BCD4);
+      default:
+        return textSecondary;
+    }
+  }
+  
+  // Status colors
+  static Color getStatusColor(bool isOnline) {
+    return isOnline ? onlineColor : offlineColor;
   }
 }
