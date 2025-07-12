@@ -1,48 +1,51 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Device {
+class Friend {
   final String id;
-  final String name;
   final String userId;
-  final DeviceType type;
+  final String friendId;
+  final String name;
+  final String email;
+  final String? profileImageUrl;
   final bool isOnline;
   final double? latitude;
   final double? longitude;
   final String? address;
   final DateTime? lastSeen;
-  final int? batteryLevel;
-  final String? networkType;
-  final String? deviceInfo;
+  final bool isLocationShared;
+  final bool isFavorite;
+  final FriendStatus status;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Device({
+  Friend({
     required this.id,
-    required this.name,
     required this.userId,
-    required this.type,
+    required this.friendId,
+    required this.name,
+    required this.email,
+    this.profileImageUrl,
     this.isOnline = false,
     this.latitude,
     this.longitude,
     this.address,
     this.lastSeen,
-    this.batteryLevel,
-    this.networkType,
-    this.deviceInfo,
+    this.isLocationShared = false,
+    this.isFavorite = false,
+    required this.status,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  factory Device.fromFirestore(DocumentSnapshot doc) {
+  factory Friend.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return Device(
+    return Friend(
       id: doc.id,
-      name: data['name'] ?? 'Unknown Device',
       userId: data['userId'] ?? '',
-      type: DeviceType.values.firstWhere(
-        (e) => e.name == data['type'],
-        orElse: () => DeviceType.phone,
-      ),
+      friendId: data['friendId'] ?? '',
+      name: data['name'] ?? 'Unknown Friend',
+      email: data['email'] ?? '',
+      profileImageUrl: data['profileImageUrl'],
       isOnline: data['isOnline'] ?? false,
       latitude: data['latitude']?.toDouble(),
       longitude: data['longitude']?.toDouble(),
@@ -50,9 +53,12 @@ class Device {
       lastSeen: data['lastSeen'] != null
           ? (data['lastSeen'] as Timestamp).toDate()
           : null,
-      batteryLevel: data['batteryLevel'],
-      networkType: data['networkType'],
-      deviceInfo: data['deviceInfo'],
+      isLocationShared: data['isLocationShared'] ?? false,
+      isFavorite: data['isFavorite'] ?? false,
+      status: FriendStatus.values.firstWhere(
+        (e) => e.name == data['status'],
+        orElse: () => FriendStatus.pending,
+      ),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
@@ -60,75 +66,71 @@ class Device {
 
   Map<String, dynamic> toFirestore() {
     return {
-      'name': name,
       'userId': userId,
-      'type': type.name,
+      'friendId': friendId,
+      'name': name,
+      'email': email,
+      'profileImageUrl': profileImageUrl,
       'isOnline': isOnline,
       'latitude': latitude,
       'longitude': longitude,
       'address': address,
       'lastSeen': lastSeen != null ? Timestamp.fromDate(lastSeen!) : null,
-      'batteryLevel': batteryLevel,
-      'networkType': networkType,
-      'deviceInfo': deviceInfo,
+      'isLocationShared': isLocationShared,
+      'isFavorite': isFavorite,
+      'status': status.name,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
 
-  Device copyWith({
+  Friend copyWith({
     String? name,
-    DeviceType? type,
+    String? email,
+    String? profileImageUrl,
     bool? isOnline,
     double? latitude,
     double? longitude,
     String? address,
     DateTime? lastSeen,
-    int? batteryLevel,
-    String? networkType,
-    String? deviceInfo,
+    bool? isLocationShared,
+    bool? isFavorite,
+    FriendStatus? status,
   }) {
-    return Device(
+    return Friend(
       id: id,
-      name: name ?? this.name,
       userId: userId,
-      type: type ?? this.type,
+      friendId: friendId,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       isOnline: isOnline ?? this.isOnline,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       address: address ?? this.address,
       lastSeen: lastSeen ?? this.lastSeen,
-      batteryLevel: batteryLevel ?? this.batteryLevel,
-      networkType: networkType ?? this.networkType,
-      deviceInfo: deviceInfo ?? this.deviceInfo,
+      isLocationShared: isLocationShared ?? this.isLocationShared,
+      isFavorite: isFavorite ?? this.isFavorite,
+      status: status ?? this.status,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
     );
   }
 }
 
-enum DeviceType {
-  phone,
-  tablet,
-  laptop,
-  watch,
-  earbuds,
-  other;
+enum FriendStatus {
+  pending,
+  accepted,
+  blocked;
 
   String get displayName {
     switch (this) {
-      case DeviceType.phone:
-        return 'Phone';
-      case DeviceType.tablet:
-        return 'Tablet';
-      case DeviceType.laptop:
-        return 'Laptop';
-      case DeviceType.watch:
-        return 'Watch';
-      case DeviceType.earbuds:
-        return 'Earbuds';
-      case DeviceType.other:
-        return 'Other';
+      case FriendStatus.pending:
+        return 'Pending';
+      case FriendStatus.accepted:
+        return 'Accepted';
+      case FriendStatus.blocked:
+        return 'Blocked';
     }
   }
 }
