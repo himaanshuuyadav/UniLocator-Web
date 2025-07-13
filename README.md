@@ -13,6 +13,11 @@ Found a bug or have a feature request?
 3. **For Firebase-related issues**: Include browser console errors
 4. **For authentication issues**: Check Firebase Console for error logs
 
+### 📋 Quick Reference Documentation
+
+- **[Firebase Setup & Troubleshooting Guide](./FIREBASE_FIX_SOLUTION.md)**: Comprehensive solutions for Firebase authentication and Firestore issues
+- **[Firestore Security Rules](./firestore_security_rules.txt)**: Production-ready security rules for your Firebase project
+
 ## 🚀 Deployment
 
 ### Production Checklist
@@ -132,6 +137,8 @@ cd Unilocator
    ```
    - Click **Publish**
 
+   📄 **For production-ready security rules**: See [firestore_security_rules.txt](./firestore_security_rules.txt) for comprehensive Firestore security configurations.
+
 ### Step 3: Configure Firebase in Your Project
 
 1. **Create Firebase Configuration File**:
@@ -227,6 +234,8 @@ The application will start on `http://localhost:5000` or your configured IP addr
 - **Firestore errors**: Verify security rules are published
 - **Connection issues**: Ensure your IP is added to authorized domains
 - **Python errors**: Check that all dependencies are installed in the virtual environment
+
+📚 **For detailed Firebase troubleshooting**: See [FIREBASE_FIX_SOLUTION.md](./FIREBASE_FIX_SOLUTION.md) for comprehensive solutions to common Firebase authentication and Firestore issues.
 
 ## 📖 Usage
 
@@ -336,6 +345,8 @@ UniLocator/
 ├── verify_setup.py        # Setup verification script
 ├── requirements.txt       # Python dependencies
 ├── README.md              # Project documentation (this file)
+├── FIREBASE_FIX_SOLUTION.md # Firebase troubleshooting guide
+├── firestore_security_rules.txt # Firestore security rules
 └── .gitignore             # Git ignore rules
 ```
 
