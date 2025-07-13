@@ -45,6 +45,13 @@ node_modules/
 *.tmp
 backup/
 
+# Firebase (keep config private)
+firebase_auth/config/firebase-config.js
+firebase_auth/config/firebase-config.json
+.env
+.env.local
+.env.production
+
 # Android Application
 Application/
 

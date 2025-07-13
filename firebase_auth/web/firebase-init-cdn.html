@@ -1,0 +1,47 @@
+<!-- Firebase CDN Setup for HTML -->
+<!-- Add this script tag to your HTML files that need Firebase -->
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+  // Your web app's Firebase configuration
+  // These should be loaded from environment variables in production
+  const firebaseConfig = {
+    apiKey: "AIzaSyAMZsPPkGMVZnYBRPBdbJ3h2xLCd68CRg8",
+    authDomain: "unilocator-368db.firebaseapp.com",
+    projectId: "unilocator-368db",
+    storageBucket: "unilocator-368db.firebasestorage.app",
+    messagingSenderId: "351670538754",
+    appId: "1:351670538754:web:44b371eb90bcf23df00d1b",
+    measurementId: "G-PYTNC78FVJ"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Make Firebase available globally for your scripts
+  window.firebase = {
+    app,
+    analytics,
+    auth,
+    db,
+    // Auth functions
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged,
+    // Firestore functions
+    doc,
+    setDoc,
+    getDoc
+  };
+
+  console.log('Firebase initialized successfully');
+</script>
