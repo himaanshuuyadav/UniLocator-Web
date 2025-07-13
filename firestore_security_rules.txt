@@ -1,0 +1,44 @@
+// Firestore Security Rules for UniLocator
+// Copy these rules to your Firebase Console -> Firestore Database -> Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection - users can read/write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to create their profile during registration
+    match /users/{userId} {
+      allow create: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Devices collection - owners can read/write their devices
+    match /devices/{deviceId} {
+      allow read, write: if request.auth != null && 
+        (resource.data.ownerId == request.auth.uid ||
+         exists(/databases/$(database)/documents/device_connections/$(deviceId + '_' + request.auth.uid)));
+    }
+    
+    // Device connections - allow read/write for connected users
+    match /device_connections/{connectionId} {
+      allow read, write: if request.auth != null && 
+        (resource.data.ownerId == request.auth.uid || 
+         resource.data.connectedUserId == request.auth.uid);
+    }
+    
+    // User device codes - for device pairing
+    match /user_device_codes/{codeId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        (resource == null || resource.data.userId == request.auth.uid);
+    }
+    
+    // Allow any authenticated user to read/write during development
+    // Remove this rule in production and use the specific rules above
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
