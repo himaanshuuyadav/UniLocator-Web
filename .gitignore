@@ -45,6 +45,9 @@ node_modules/
 *.tmp
 backup/
 
+# Android Application
+Application/
+
 # Misc
 *.orig
 *.rej
