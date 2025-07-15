@@ -10,16 +10,18 @@ bp = Blueprint('auth', __name__)
 
 @bp.route('/login', methods=['POST'])
 def login():
-    # Expect JSON with {"firebase_uid": ...}
+    # Expect JSON with {"firebase_uid": ..., "email": ...}
     data = request.get_json()
     firebase_uid = data.get('firebase_uid')
-    print(f"[DEBUG] /login called. firebase_uid: {firebase_uid}")
+    user_email = data.get('email', '')
+    print(f"[DEBUG] /login called. firebase_uid: {firebase_uid}, email: {user_email}")
     if not firebase_uid:
         print("[DEBUG] /login failed: Missing firebase_uid")
         return jsonify({'success': False, 'error': 'Missing firebase_uid'}), 400
-    # Set session cookie
+    # Set session cookies
     session['user_id'] = firebase_uid
-    print(f"[DEBUG] /login success. session['user_id']: {session.get('user_id')}")
+    session['user_email'] = user_email
+    print(f"[DEBUG] /login success. session['user_id']: {session.get('user_id')}, session['user_email']: {session.get('user_email')}")
     return jsonify({'success': True, 'redirect': url_for('main.dashboard')})
 
 @bp.route('/logout', methods=['POST'])
