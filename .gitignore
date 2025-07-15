@@ -16,13 +16,31 @@
 
 # Python
 __pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
 *.pyc
 *.pyo
 *.pyd
+*.so
 *.db
 *.sqlite3
 *.egg-info/
 *.log
+*.spec
+.pytest_cache/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
 instance/unilocator.db
 
 # VSCode/IDE
@@ -53,6 +71,15 @@ firebase_auth/web/firebase-config-cdn.js
 .env.local
 .env.production
 
+# Firebase service account keys - CRITICAL SECURITY
+service-account-key.json
+**/service-account*.json
+**/*service-account*.json
+
+# Environment files - SENSITIVE DATA
+.env.*
+!.env.template
+
 # Android Application
 Application/
 
@@ -68,3 +95,6 @@ Application/
 
 # Ignore Android Studio local properties
 **/local.properties
+
+# VS Code Code Runner
+tempCodeRunnerFile.*
