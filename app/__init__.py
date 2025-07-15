@@ -26,12 +26,26 @@ def create_app():
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['SESSION_COOKIE_SECURE'] = False  # Set to True if using HTTPS
     
+    # Initialize Firebase
+    try:
+        from .utils.firebase_utils import initialize_firebase
+        initialize_firebase()
+        print("✅ Firebase Admin SDK initialized successfully")
+    except Exception as e:
+        print(f"❌ Failed to initialize Firebase: {e}")
+        # You can decide whether to continue without Firebase or exit
+    
     # Register blueprints
     from .routes import devices, main, api, auth
     app.register_blueprint(devices.bp, url_prefix='/devices')
     app.register_blueprint(main.bp)
     app.register_blueprint(api.bp)
     app.register_blueprint(auth.bp)
+    
+    # Make config available to templates
+    @app.context_processor
+    def inject_config():
+        return {'config': app.config}
     
     # Serve Firebase web auth static files
     import os
