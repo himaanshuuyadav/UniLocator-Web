@@ -1,4 +1,67 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize navigation slider
+    const slider = document.createElement('div');
+    slider.className = 'nav-slider';
+    document.querySelector('.nav-links')?.appendChild(slider);
+
+    function updateSlider(target) {
+        const navItem = target.closest('.nav-item');
+        if (!navItem) return;
+
+        const navRect = navItem.getBoundingClientRect();
+        const navLinksRect = document.querySelector('.nav-links').getBoundingClientRect();
+
+        slider.style.width = `${navRect.width}px`;
+        slider.style.left = `${navRect.left - navLinksRect.left}px`;
+        slider.style.opacity = '1';
+    }
+
+    // Function to switch active page
+    function switchPage(pageId) {
+        // Hide all pages
+        document.querySelectorAll('.page-content').forEach(page => {
+            page.classList.remove('active');
+            page.style.display = 'none';
+        });
+
+        // Show selected page
+        const selectedPage = document.getElementById(`${pageId}-page`);
+        if (selectedPage) {
+            selectedPage.classList.add('active');
+            selectedPage.style.display = 'flex';
+        }
+    }
+
+    // Handle navigation link clicks
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Remove active class from all links
+            navLinks.forEach(l => l.parentElement.classList.remove('active'));
+            
+            // Add active class to clicked link
+            link.parentElement.classList.add('active');
+            
+            // Update slider position
+            updateSlider(link);
+            
+            // Switch to the corresponding page
+            const page = link.getAttribute('data-page');
+            switchPage(page);
+        });
+    });
+
+    // Set initial slider position for active tab
+    const activeTab = document.querySelector('.nav-item.active .nav-link');
+    if (activeTab) {
+        updateSlider(activeTab);
+        // Set initial page
+        const initialPage = activeTab.getAttribute('data-page');
+        switchPage(initialPage);
+    }
+
     // Display Firebase username in navbar
     function updateNavbarUsername(user) {
         var name = '';
@@ -24,204 +87,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAuth();
 
     console.log('Main script loading...');
-
-    // Restore original static event listeners and simple step logic
-    // Get modal elements
-    const modal = document.getElementById('addDeviceModal');
-    const addDeviceBtns = document.querySelectorAll('.add-device-btn');
-    const closeBtn = modal?.querySelector('.close');
-    const nextBtn = modal?.querySelector('.btn-next');
-    const prevBtn = modal?.querySelector('.btn-previous');
-    const methodBtns = modal?.querySelectorAll('.method-btn');
-
-    let currentStep = 1;
-    const totalSteps = 3;
-    let uniqueCode = '';
-    let qrCodeInstance = null;
-
-    // Add click handlers to all add device buttons
-    addDeviceBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (modal) {
-                modal.classList.add('show');
-                modal.style.display = 'block';
-                resetSteps();
-                console.log('Opening modal');
-            }
-        });
-    });
-
-    function generateUniqueCode(method) {
-        console.log('Generating code for method:', method); // Debug log
-
-        // Show loading state in the correct modal container
-        if (method === 'qr') {
-            document.getElementById('qrCode').innerHTML = '<div class="loading">Generating QR code...</div>';
-        } else {
-            document.getElementById('connectionCode').innerHTML = '<div class="loading">Generating code...</div>';
-        }
-
-        fetch('/devices/generate-code', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            credentials: 'same-origin'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                if (method === 'qr') {
-                    document.getElementById('qrCode').innerHTML = `
-                        <img src="${data.qr_code}" alt="QR Code" class="qr-code">
-                    `;
-                } else {
-                    document.getElementById('connectionCode').innerHTML = `
-                        <div class="connection-code">${data.code}</div>
-                    `;
-                }
-            } else {
-                throw new Error(data.error || 'Failed to generate code');
-            }
-        })
-        .catch(error => {
-            if (method === 'qr') {
-                document.getElementById('qrCode').innerHTML = `<div class="error-message">Error generating QR code.<br><small>${error.message}</small></div>`;
-            } else {
-                document.getElementById('connectionCode').innerHTML = `<div class="error-message">Error generating code.<br><small>${error.message}</small></div>`;
-            }
-        });
-    }
-
-    // Method selection handlers
-    methodBtns?.forEach(btn => {
-        btn.addEventListener('click', () => {
-            methodBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const method = btn.dataset.method;
-            const qrMethod = modal.querySelector('.qr-method');
-            const codeMethod = modal.querySelector('.code-method');
-            if (method === 'qr') {
-                if (qrMethod) qrMethod.classList.remove('hidden');
-                if (codeMethod) codeMethod.classList.add('hidden');
-            } else {
-                if (qrMethod) qrMethod.classList.add('hidden');
-                if (codeMethod) codeMethod.classList.remove('hidden');
-            }
-            // Enable Next button if on step 2
-            if (currentStep === 2 && nextBtn) nextBtn.disabled = false;
-        });
-    });
-
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-            if (currentStep < totalSteps) {
-                // On step 2, only allow if a method is selected
-                if (currentStep === 2) {
-                    const selectedMethodBtn = modal.querySelector('.method-btn.active');
-                    if (!selectedMethodBtn) return;
-                }
-                currentStep++;
-                showStep(currentStep);
-                // If moving to step 3, generate code/QR for selected method
-                if (currentStep === 3) {
-                    const selectedMethodBtn = modal.querySelector('.method-btn.active');
-                    if (selectedMethodBtn) {
-                        const method = selectedMethodBtn.dataset.method;
-                        generateUniqueCode(method);
-                    }
-                }
-            } else if (currentStep === totalSteps) {
-                modal.style.display = 'none';
-                resetSteps();
-            }
-        });
-    }
-
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-            if (currentStep > 1) {
-                currentStep--;
-                showStep(currentStep);
-            }
-        });
-    }
-
-    function showStep(step) {
-        const steps = modal.querySelectorAll('.step');
-        steps.forEach((s, index) => {
-            s.classList.toggle('active', index + 1 === step);
-        });
-
-        if (prevBtn) prevBtn.disabled = step === 1;
-        if (nextBtn) {
-            nextBtn.innerHTML = step === totalSteps ?
-                'Finish <i class="fas fa-check"></i>' :
-                'Next <i class="fas fa-arrow-right"></i>';
-        }
-
-        // Only disable Next on step 2 if no method is selected
-        if (step === 2) {
-            if (nextBtn) nextBtn.disabled = true;
-            const selectedMethodBtn = modal.querySelector('.method-btn.active');
-            if (selectedMethodBtn && nextBtn) nextBtn.disabled = false;
-        } else {
-            if (nextBtn) nextBtn.disabled = false;
-        }
-    }
-
-    function resetSteps() {
-        currentStep = 1;
-        showStep(1);
-        uniqueCode = '';
-        
-        const methodBtns = modal.querySelectorAll('.method-btn');
-        methodBtns.forEach(btn => btn.classList.remove('active'));
-        
-        const qrMethod = modal.querySelector('.qr-method');
-        const codeMethod = modal.querySelector('.code-method');
-        if (qrMethod) qrMethod.classList.add('hidden');
-        if (codeMethod) codeMethod.classList.add('hidden');
-
-        // Clear QR code and connection code containers if they exist
-        const qrContainer = document.getElementById('qrCode');
-        const codeContainer = document.getElementById('connectionCode');
-        if (qrContainer) qrContainer.innerHTML = '';
-        if (codeContainer) codeContainer.textContent = '';
-    }
-
-    function connectDevice(deviceCode) {
-        fetch('/connect-device', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ device_code: deviceCode })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                console.log('Device connected successfully:', data.message);
-                // Show success message to user
-                alert('Device connected successfully!');
-                // Optionally reload the page to show the new device
-                window.location.reload();
-            } else {
-                console.error('Connection failed:', data.message);
-                alert('Failed to connect device: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Connection error:', error);
-            alert('Error connecting device. Please try again.');
-        });
-    }
 
     // Initialize Socket.IO with proper configuration
     const socket = io({
@@ -359,3 +224,73 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('Main script initialized');
 });
+
+// Device Action Functions
+function locateDevice(deviceId) {
+    console.log('Locating device:', deviceId);
+    // You can implement location tracking here
+    alert('Location tracking for device ' + deviceId + ' will be implemented soon.');
+}
+
+function ringDevice(deviceId) {
+    console.log('Ringing device:', deviceId);
+    // You can implement device ringing here
+    alert('Ring command sent to device ' + deviceId);
+}
+
+function inspectDeviceData(deviceId) {
+    console.log('Inspecting device data for:', deviceId);
+    
+    fetch('/api/debug-device-data', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ device_id: deviceId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.devices && data.devices.length > 0) {
+            const device = data.devices.find(d => d.id === deviceId) || data.devices[0];
+            
+            // Create a modal or alert to show device data
+            const deviceInfo = JSON.stringify(device, null, 2);
+            const popup = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+            popup.document.write(`
+                <html>
+                <head>
+                    <title>Device Data Inspector</title>
+                    <style>
+                        body { 
+                            font-family: monospace; 
+                            background: #1a1a1a; 
+                            color: #10b981; 
+                            padding: 20px; 
+                        }
+                        pre { 
+                            white-space: pre-wrap; 
+                            word-wrap: break-word; 
+                            background: #111; 
+                            padding: 15px; 
+                            border-radius: 5px; 
+                            border: 1px solid #333;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h2>🔬 Device Data Inspector</h2>
+                    <p>Raw Firebase data for device: <strong>${deviceId}</strong></p>
+                    <pre>${deviceInfo}</pre>
+                </body>
+                </html>
+            `);
+        } else {
+            alert('No device data found for device: ' + deviceId);
+        }
+    })
+    .catch(error => {
+        console.error('Error inspecting device data:', error);
+        alert('Failed to inspect device data. Please try again.');
+    });
+}
