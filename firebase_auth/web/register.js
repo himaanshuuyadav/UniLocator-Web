@@ -35,13 +35,20 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('[DEBUG] Firebase registration result:', result);
             
             if (result.success && result.user && result.user.uid) {
-                console.log('[DEBUG] Firebase registration successful, sending UID to Flask backend...');
-                // Send UID to Flask backend to set session
+                console.log('[DEBUG] Firebase registration successful, sending UID and email to Flask backend...');
+                console.log('[DEBUG] User object:', result.user);
+                console.log('[DEBUG] User email from result:', result.user.email);
+                console.log('[DEBUG] Form email:', email);
+                
+                // Send UID and email to Flask backend to set session
                 fetch('/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ firebase_uid: result.user.uid })
+                    body: JSON.stringify({ 
+                        firebase_uid: result.user.uid,
+                        email: result.user.email || email // Use form email as fallback
+                    })
                 })
                 .then(res => {
                     console.log('[DEBUG] Flask /login response status:', res.status);
