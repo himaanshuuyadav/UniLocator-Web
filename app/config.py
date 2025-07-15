@@ -9,10 +9,9 @@ class Config:
     # Flask Configuration
     SECRET_KEY = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
     
-    # Database Configuration
+    # Database Configuration - Firebase only, no local SQLite
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-    DATABASE = os.environ.get('DATABASE_URL') or os.path.join(BASE_DIR, 'instance', 'unilocator.db')
-    SCHEMA_PATH = os.path.join(BASE_DIR, 'instance', 'schema.sql')
+    # Removed DATABASE and SCHEMA_PATH - using Firebase Firestore only
     
     # Firebase Configuration
     FIREBASE_API_KEY = os.environ.get('FIREBASE_API_KEY')

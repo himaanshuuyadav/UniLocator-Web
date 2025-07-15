@@ -41,7 +41,7 @@ parts/
 sdist/
 var/
 wheels/
-instance/unilocator.db
+
 
 # VSCode/IDE
 .vscode/
