@@ -5,104 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UniLocator - Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/Dashboard.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/add_device.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/add_devices.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Firebase Web SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-    <!-- Mobile Sidebar Toggle -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">
-                <i class="fa-solid fa-location-pin"></i>
-                <span class="sidebar-logo-text">UniLocator</span>
-            </div>
-            <button class="sidebar-toggle" id="sidebarClose">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <nav class="sidebar-nav">
-            <ul class="sidebar-menu">
-                <li class="sidebar-item active">
-                    <a href="#" class="sidebar-link" data-page="devices">
-                        <i class="fas fa-mobile-alt"></i>
-                        <span>Devices</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link" data-page="map">
-                        <i class="fas fa-map"></i>
-                        <span>Live Map</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link" data-page="friends">
-                        <i class="fas fa-users"></i>
-                        <span>Friends</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link" data-page="security">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Security Advisor</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link" data-page="profile">
-                        <i class="fas fa-user"></i>
-                        <span>Profile</span>
-                    </a>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link" data-page="settings">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
-        <!-- <div class="sidebar-footer">
-            <div class="upgrade-card">
-                <div class="upgrade-icon">
-                    <i class="fas fa-crown"></i>
-                </div>
-                <h4>Upgrade to Pro</h4>
-                <p>Unlock advanced features and unlimited devices</p>
-                <button class="upgrade-btn">
-                    <i class="fas fa-arrow-up"></i>
-                    Upgrade Now
-                </button>
-            </div>
-        </div> -->
-    </aside>
-
     <!-- Main Content -->
     <div class="main-wrapper">
-        <!-- Top Header -->
-        <header class="top-header">
-            <div class="header-left">
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-            <div class="header-right">
-                <span class="user-name" id="navbar-username"></span>
-                <div class="user-avatar">
-                    <i class="fas fa-user-circle"></i>
+        <!-- Top Navigation Bar -->
+        <nav class="top-nav">
+            <!-- Left Section - Logo -->
+            <div class="nav-left">
+                <div class="nav-logo">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="UniLocator Logo" class="nav-logo-img">
+                    <span class="nav-logo-text">UniLocator</span>
                 </div>
             </div>
-        </header>
+
+            <!-- Center Section - Navigation Links -->
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li class="nav-item active">
+                        <a href="#" class="nav-link" data-page="devices">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Devices</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="map">
+                            <i class="fas fa-map"></i>
+                            <span>Live Map</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="friends">
+                            <i class="fas fa-users"></i>
+                            <span>People</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="security">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Security</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="profile">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="settings">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Right Section - Icons -->
+            <div class="nav-right">
+                <button class="nav-icon-btn">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <button class="nav-icon-btn">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <div class="nav-user">
+                    <span class="user-name" id="navbar-username"></span>
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </nav>
 
         <!-- Main Content Area -->
         <main class="main-content">
             <div class="content-wrapper">
                 <!-- Devices Section (shown when Devices is active) -->
                 <div id="devices-page" class="page-content active">
-                    <h1 class="page-title">Devices</h1>
+                    <!-- <h1 class="page-title">Devices</h1> -->
                     <div class="page-content-inner">
                     {% if devices %}
                         <div class="devices-section">
@@ -111,92 +99,73 @@
                                     <h2>Connected Devices</h2>
                                     <span class="device-count">{{ devices|length }} device{{ 's' if devices|length != 1 else '' }}</span>
                                 </div>
-                                <button class="add-device-btn" type="button">
-                                    <i class="fas fa-plus"></i>
-                                    <span>Add Device</span>
-                                </button>
                             </div>
                             <div class="devices-grid">
                                 {% for device in devices %}
                                     <div class="device-card">
-                                        <div class="device-card-header">
-                                            <div class="device-info">
-                                                <div class="device-icon">
+                                        <!-- Device Header with Icon and Status -->
+                                        <div class="device-header">
+                                            <div class="device-icon">
+                                                {% if device.device_type == 'tablet' %}
+                                                    <i class="fas fa-tablet-alt"></i>
+                                                {% else %}
                                                     <i class="fas fa-mobile-alt"></i>
-                                                </div>
-                                                <div class="device-details">
-                                                    <h3 class="device-name">{{ device.name or device.device_name or 'Unknown Device' }}</h3>
-                                                    <div class="device-status-badge connected">
-                                                        <i class="fas fa-circle"></i>
-                                                        <span>Connected</span>
-                                                    </div>
-                                                </div>
+                                                {% endif %}
                                             </div>
-                                            <div class="device-actions">
-                                                <button class="device-menu-btn" aria-label="Device actions">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </button>
-                                                <div class="device-menu-dropdown hidden">
-                                                    <button class="remove-device-btn" data-device-code="{{ device.code }}">
-                                                        <i class="fas fa-trash"></i> Remove
-                                                    </button>
-                                                </div>
+                                            
+                                            <!-- Status Badge -->
+                                            <div class="device-status-badge {{ 'connected' if device.is_active else 'offline' }}">
+                                                <i class="fas fa-circle"></i>
+                                                <span>{{ 'Connected' if device.is_active else 'Offline' }}</span>
                                             </div>
                                         </div>
                                         
-                                        <div class="device-card-body">
-                                            <div class="device-stat">
-                                                <i class="fas fa-qrcode"></i>
-                                                <div class="stat-info">
-                                                    <span class="stat-label">Device ID</span>
-                                                    <span class="stat-value">{{ device.code or device.device_code }}</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="device-stat">
-                                                <i class="fas fa-map-marker-alt"></i>
-                                                <div class="stat-info">
-                                                    <span class="stat-label">Last Location</span>
-                                                    <span class="stat-value">
-                                                        {% if device.location and (device.location.lat != 0 or device.location.lng != 0) %}
-                                                            {{ "%.4f"|format(device.location.lat) }}, {{ "%.4f"|format(device.location.lng) }}
-                                                        {% elif device.last_latitude is defined and device.last_longitude is defined and (device.last_latitude or device.last_longitude) %}
-                                                            {{ "%.4f"|format(device.last_latitude) }}, {{ "%.4f"|format(device.last_longitude) }}
-                                                        {% else %}
-                                                            Waiting for location...
-                                                        {% endif %}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="device-stat">
-                                                <i class="fas fa-clock"></i>
-                                                <div class="stat-info">
-                                                    <span class="stat-label">Last Seen</span>
-                                                    <span class="stat-value">{{ device.connected_at }}</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="device-stats-row">
-                                                <div class="device-stat-mini">
-                                                    <i class="fas fa-battery-half"></i>
-                                                    <span>{{ device.last_battery if device.last_battery is defined else '--' }}%</span>
-                                                </div>
-                                                <div class="device-stat-mini">
-                                                    <i class="fas fa-wifi"></i>
-                                                    <span>{{ device.last_network if device.last_network is defined else 'Unknown' }}</span>
-                                                </div>
-                                            </div>
+                                        <!-- Device Name -->
+                                        <h3 class="device-name">{{ device.name or device.device_name or 'Unknown Device' }}</h3>
+                                        
+                                        <!-- Last Seen Location -->
+                                        <div class="device-location">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>
+                                                {% if device.location and (device.location.lat != 0 or device.location.lng != 0) %}
+                                                    Location available
+                                                {% elif device.last_latitude is defined and device.last_longitude is defined and (device.last_latitude or device.last_longitude) %}
+                                                    Location available
+                                                {% else %}
+                                                    Location unknown
+                                                {% endif %}
+                                            </span>
                                         </div>
                                         
-                                        <div class="device-card-footer">
-                                            <a href="{{ url_for('main.show_map', device_id=device.code) }}" class="track-btn" target="_blank">
+                                        <!-- Track Device Button -->
+                                        <div class="device-actions">
+                                            <a href="{{ url_for('main.show_map', device_id=device.code) }}" class="track-device-btn" target="_blank">
                                                 <i class="fas fa-location-arrow"></i>
-                                                Track Device
+                                                <span>Track Device</span>
                                             </a>
                                         </div>
                                     </div>
                                 {% endfor %}
+                            </div>
+                            
+                            <!-- Debug Section for Devices View -->
+                            <div class="debug-section" style="margin: 20px 0; padding: 15px; background: #f0f8f0; border: 1px solid #4ade80; border-radius: 8px;">
+                                <h4 style="color: #16a34a; margin-bottom: 10px;">🔧 Debug: Firebase Device Analysis</h4>
+                                
+                                <div style="margin-bottom: 15px;">
+                                    <button id="debugDataBtn" class="debug-btn" style="background: #8b5cf6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-size: 12px;">
+                                        <i class="fas fa-microscope"></i>
+                                        🔬 Inspect Raw Device Data
+                                    </button>
+                                    <button id="refreshDevicesBtn" class="debug-btn" style="background: #059669; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-size: 12px;">
+                                        <i class="fas fa-sync"></i>
+                                        🔄 Refresh from Firebase
+                                    </button>
+                                </div>
+                                
+                                <div id="fetchDebugOutput" style="margin-top: 15px; padding: 10px; background: #1f2937; color: #10b981; font-family: monospace; font-size: 12px; border-radius: 5px; max-height: 400px; overflow-y: auto; display: none;">
+                                    <div id="debugContent"></div>
+                                </div>
                             </div>
                         </div>
                     {% else %}
@@ -206,7 +175,66 @@
                             </div>
                             <h2>No Devices Connected</h2>
                             <p>Get started by connecting your first device to UniLocator</p>
-                            <button class="add-device-btn primary" type="button">
+                            
+                            <!-- Load Devices from Firebase -->
+                            <div style="margin: 20px 0;">
+                                <button id="loadDevicesBtn" class="add-device-btn primary" style="background: #16a34a; margin-bottom: 15px;">
+                                    <i class="fas fa-cloud-download-alt"></i>
+                                    Load My Devices from Firebase
+                                </button>
+                                <div id="loadDevicesStatus" style="display: none; margin-top: 10px; padding: 10px; border-radius: 5px; font-size: 14px;"></div>
+                            </div>
+                            
+                            <!-- Debug Firebase Fetch Button -->
+                            <div class="debug-section" style="margin: 20px 0; padding: 15px; background: #f0f8f0; border: 1px solid #4ade80; border-radius: 8px;">
+                                <h4 style="color: #16a34a; margin-bottom: 10px;">🔧 Debug: Firebase Device Fetching</h4>
+                                
+                                <!-- Strategy Buttons Row 1 -->
+                                <div style="margin-bottom: 10px;">
+                                    <button id="testBasicBtn" class="debug-btn" style="background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-right: 8px; font-size: 11px;">
+                                        <i class="fas fa-user-check"></i>
+                                        1. Basic Auth Test
+                                    </button>
+                                    <button id="testSimpleConnBtn" class="debug-btn" style="background: #059669; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-right: 8px; font-size: 11px;">
+                                        <i class="fas fa-wifi"></i>
+                                        2. Simple Connection
+                                    </button>
+                                    <button id="testWebSDKBtn" class="debug-btn" style="background: #7c3aed; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-right: 8px; font-size: 11px;">
+                                        <i class="fas fa-globe"></i>
+                                        3. Web SDK Test
+                                    </button>
+                                </div>
+                                
+                                <!-- Strategy Buttons Row 2 -->
+                                <div style="margin-bottom: 15px;">
+                                    <button id="testRESTAPIBtn" class="debug-btn" style="background: #ea580c; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-right: 8px; font-size: 11px;">
+                                        <i class="fas fa-link"></i>
+                                        4. REST API Test
+                                    </button>
+                                    <button id="testFirebaseBtn" class="debug-btn" style="background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-right: 8px; font-size: 11px;">
+                                        <i class="fas fa-flask"></i>
+                                        5. Admin SDK Test
+                                    </button>
+                                    <button id="fetchDevicesBtn" class="debug-btn" style="background: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-right: 8px; font-size: 11px;">
+                                        <i class="fas fa-download"></i>
+                                        6. Multi-Strategy Fetch
+                                    </button>
+                                </div>
+                                
+                                <!-- Debug Data Button -->
+                                <div style="margin-bottom: 15px;">
+                                    <button id="debugDataBtn" class="debug-btn" style="background: #8b5cf6; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-right: 8px; font-size: 11px;">
+                                        <i class="fas fa-microscope"></i>
+                                        🔬 Inspect Raw Device Data
+                                    </button>
+                                </div>
+                                
+                                <div id="fetchDebugOutput" style="margin-top: 15px; padding: 10px; background: #1f2937; color: #10b981; font-family: monospace; font-size: 12px; border-radius: 5px; max-height: 400px; overflow-y: auto; display: none;">
+                                    <div id="debugContent"></div>
+                                </div>
+                            </div>
+                            
+                            <button id="addDeviceBtn" class="add-device-btn primary" onclick="window.openAddDeviceModal()">
                                 <i class="fas fa-plus"></i>
                                 <span>Add Your First Device</span>
                             </button>
@@ -474,107 +502,121 @@
         </main>
     </div>
 
-    <!-- Add Device Modal -->
+    <!-- ====================
+         ADD DEVICE MODAL START
+         ==================== -->
     <div id="addDeviceModal" class="modal">
         <div class="modal-content">
+            <!-- Modal Header -->
             <div class="modal-header">
                 <h2>Add New Device</h2>
-                <span class="close">&times;</span>
+                <button class="modal-close" aria-label="Close modal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <!-- <hr class="modal-divider"> -->
+            
+            <!-- Modal Body -->
             <div class="modal-body">
-                <div class="steps">
-                    <div class="step step-1 active">
-                        <h3>Download UniLocator App</h3>
-                        <div class="app-download">
-                            <p>Scan the QR code to download the UniLocator app from GitHub:</p>
-                            
-                            <!-- QR Code Container -->
-                            <div id="githubQrContainer" class="github-qr-container">
-                                <div class="qr-wrapper">
-                                    <div id="githubQrCode" class="github-qr-code">
-                                        <!-- QR code will be generated here -->
-                                    </div>
-                                </div>
-                                <p class="qr-description">Scan with your phone's camera to download the APK</p>
-                                <button id="showDirectDownload" class="direct-download-toggle">
-                                    <i class="fas fa-download"></i>
-                                    Download APK Here
-                                </button>
-                            </div>
-                            
-                            <!-- Direct Download Container (Hidden initially) -->
-                            <div id="directDownloadContainer" class="direct-download-container hidden">
-                                <p>Download the APK directly to this device:</p>
-                                <a href="#" id="directDownloadBtn" class="direct-download-btn">
-                                    <i class="fab fa-android"></i>
-                                    Download UniLocator APK
-                                </a>
-                                <button id="showQrAgain" class="show-qr-toggle">
-                                    <i class="fas fa-qrcode"></i>
-                                    Show QR Code Again
-                                </button>
+                <!-- Step 1: App Download -->
+                <div class="step-container active" data-step="1">
+                    <h3 class="step-title">Download UniLocator App</h3>
+                    <p class="step-description">
+                        Scan the QR code below to download the UniLocator app from GitHub releases
+                    </p>
+                    
+                    <div class="app-download-section">
+                        <div class="github-qr-container">
+                            <div id="githubQrCode" class="github-qr-code">
+                                <!-- GitHub QR code will be generated here -->
                             </div>
                         </div>
+                        
+                        <button class="download-button" onclick="downloadAPK()">
+                            <i class="fab fa-android"></i>
+                            <span>Download APK</span>
+                        </button>
                     </div>
-
-                    <div class="step step-2">
-                        <h3>Choose Connection Method</h3>
-                        <div class="connection-methods">
-                            <button class="connection-method-btn" data-method="qr">
+                </div>
+                
+                <!-- Step 2: Connection Method Selection -->
+                <div class="step-container" data-step="2">
+                    <h3 class="step-title">Choose Connection Method</h3>
+                    <p class="step-description">
+                        Select how you want to connect your device to UniLocator
+                    </p>
+                    
+                    <div class="connection-methods">
+                        <div class="method-option" data-method="qr">
+                            <div class="method-icon">
                                 <i class="fas fa-qrcode"></i>
-                                <span>Connect via QR Code</span>
-                                <small>Scan QR code with your device</small>
-                            </button>
-                            <button class="connection-method-btn" data-method="code">
+                            </div>
+                            <div class="method-title">QR Code</div>
+                            <div class="method-description">Scan QR code with your device camera</div>
+                        </div>
+                        
+                        <div class="method-option" data-method="code">
+                            <div class="method-icon">
                                 <i class="fas fa-keyboard"></i>
-                                <span>Connect via Code</span>
-                                <small>Enter unique code manually</small>
-                            </button>
+                            </div>
+                            <div class="method-title">Pairing Code</div>
+                            <div class="method-description">Enter 8-digit code manually</div>
                         </div>
                     </div>
-                    </div>
-
-                    <div class="step step-3">
-                        <h3>Connect Your Device</h3>
-                        <div class="connection-result">
-                            <div class="qr-method hidden">
-                                <div class="connection-qr-container">
-                                    <div id="qrCode" class="connection-qr-code"></div>
-                                </div>
-                                <p class="connection-description">Scan this QR code using the UniLocator app</p>
+                </div>
+                
+                <!-- Step 3: Connection Display -->
+                <div class="step-container" data-step="3">
+                    <h3 class="step-title">Connect Your Device</h3>
+                    <p class="step-description">
+                        Use the UniLocator app to connect using the method below
+                    </p>
+                    
+                    <div class="refresh-timer" id="refreshTimer">2:00</div>
+                    
+                    <div class="connection-display">
+                        <!-- QR Code Display -->
+                        <div class="connection-qr-container">
+                            <div id="connectionQrCode" class="connection-qr-code">
+                                <!-- Connection QR code will be generated here -->
                             </div>
-                            <div class="code-method hidden">
-                                <div class="connection-code-container">
-                                    <div id="connectionCode" class="connection-unique-code"></div>
-                                </div>
-                                <p class="connection-description">Enter this code in your UniLocator app</p>
+                        </div>
+                        
+                        <!-- Code Display -->
+                        <div class="connection-code-container" style="display: none;">
+                            <div id="connectionCodeDisplay" class="connection-code-display">
+                                <!-- Connection code will be displayed here -->
                             </div>
+                            <p style="color: #888; font-size: 0.9rem; margin-top: 8px;">
+                                <i class="fas fa-info-circle"></i> Click code to copy
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
             
+            <!-- Modal Footer -->
             <div class="modal-footer">
-                <button class="btn-previous" disabled>
-                    <i class="fas fa-arrow-left"></i> Previous
+                <button id="modalPrevBtn" class="modal-btn modal-btn-secondary" disabled>
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Previous</span>
                 </button>
-                <button class="btn-next" id="step2Next" disabled>
-                    Next <i class="fas fa-arrow-right"></i>
+                
+                <button id="modalNextBtn" class="modal-btn modal-btn-primary">
+                    <span>Next</span>
+                    <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
         </div>
     </div>
-
-    <!-- Step 3 Content -->
-    <div id="step3Content" class="step-content">
-        <!-- Content will be dynamically inserted here -->
-    </div>
+    <!-- ====================
+         ADD DEVICE MODAL END
+         ==================== -->
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/add_device.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/add_devices.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nav-animation.js') }}"></script>
 
     <!-- Firebase App (the core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -884,6 +926,761 @@
                 }, 300);
             }, 3000);
         }
+
+        // Debug Firebase Device Fetching
+        function initDebugDeviceFetch() {
+            const fetchBtn = document.getElementById('fetchDevicesBtn');
+            const testBtn = document.getElementById('testFirebaseBtn');
+            const basicBtn = document.getElementById('testBasicBtn');
+            const debugOutput = document.getElementById('fetchDebugOutput');
+            const debugContent = document.getElementById('debugContent');
+            
+            if (!fetchBtn) return;
+            
+            // Basic Auth Test Button (Ultra Simple)
+            if (basicBtn) {
+                basicBtn.addEventListener('click', async function() {
+                    console.log('[DEBUG] Basic auth test button clicked');
+                    
+                    // Show loading state
+                    basicBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+                    basicBtn.disabled = true;
+                    
+                    // Show debug output area
+                    debugOutput.style.display = 'block';
+                    debugContent.innerHTML = '<div style="color: #fbbf24;">🔄 Testing basic authentication...</div>';
+                    
+                    try {
+                        console.log('[DEBUG] Making basic auth test request...');
+                        
+                        const response = await fetch('/api/test-basic-auth', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            credentials: 'include'
+                        });
+                        
+                        console.log('[DEBUG] Basic test response status:', response.status);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('[DEBUG] Basic test response data:', data);
+                        
+                        // Display results
+                        let debugHtml = '';
+                        
+                        if (data.success) {
+                            debugHtml += `<div style="color: #10b981; font-weight: bold;">✅ BASIC AUTH SUCCESS</div><br>`;
+                        } else {
+                            debugHtml += `<div style="color: #ef4444; font-weight: bold;">❌ BASIC AUTH FAILED</div><br>`;
+                        }
+                        
+                        debugHtml += `<div style="color: #60a5fa;">👤 User ID: ${data.user_id || 'Not found'}</div>`;
+                        debugHtml += `<div style="color: #60a5fa;">🔑 Session Keys: ${data.session_keys.join(', ')}</div>`;
+                        debugHtml += `<div style="color: #60a5fa;">⏰ Timestamp: ${data.timestamp}</div><br>`;
+                        
+                        debugHtml += `<div style="color: #fbbf24; font-weight: bold;">📋 SESSION DATA:</div>`;
+                        debugHtml += `<div style="color: #e5e7eb; margin-left: 10px;">${JSON.stringify(data.session_data, null, 2)}</div>`;
+                        
+                        debugHtml += `<br><div style="color: #10b981;">✅ ${data.message}</div>`;
+                        
+                        debugContent.innerHTML = debugHtml;
+                        
+                    } catch (error) {
+                        console.error('[DEBUG] Basic test error:', error);
+                        debugContent.innerHTML = `
+                            <div style="color: #ef4444; font-weight: bold;">❌ BASIC TEST FAILED</div>
+                            <div style="color: #e5e7eb;">Error: ${error.message}</div>
+                            <div style="color: #fbbf24;">This indicates a fundamental connection problem</div>
+                        `;
+                    }
+                    
+                    // Reset button
+                    basicBtn.innerHTML = '<i class="fas fa-user-check"></i> Basic Auth Test';
+                    basicBtn.disabled = false;
+                });
+            }
+            
+            // Simple Firebase Test Button
+            if (testBtn) {
+                testBtn.addEventListener('click', async function() {
+                    console.log('[DEBUG] Simple Firebase test button clicked');
+                    
+                    // Show loading state
+                    testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+                    testBtn.disabled = true;
+                    
+                    // Show debug output area
+                    debugOutput.style.display = 'block';
+                    debugContent.innerHTML = '<div style="color: #fbbf24;">🔄 Running Firebase connectivity test...</div>';
+                    
+                    try {
+                        const response = await fetch('/api/test-firebase-simple', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            credentials: 'include'
+                        });
+                        
+                        console.log('[DEBUG] Simple test response status:', response.status);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('[DEBUG] Simple test response data:', data);
+                        
+                        // Display results
+                        let debugHtml = '';
+                        
+                        if (data.success) {
+                            debugHtml += `<div style="color: #10b981; font-weight: bold;">✅ FIREBASE CONNECTIVITY SUCCESS</div><br>`;
+                        } else {
+                            debugHtml += `<div style="color: #ef4444; font-weight: bold;">❌ FIREBASE CONNECTIVITY FAILED</div><br>`;
+                        }
+                        
+                        debugHtml += `<div style="color: #60a5fa;">👤 User ID: ${data.user_id}</div>`;
+                        debugHtml += `<div style="color: #60a5fa;">⏰ Timestamp: ${data.timestamp}</div><br>`;
+                        
+                        debugHtml += `<div style="color: #fbbf24; font-weight: bold;">📋 TEST STEPS:</div>`;
+                        data.steps.forEach((step, index) => {
+                            debugHtml += `<div style="margin-left: 10px; color: #e5e7eb;">${step}</div>`;
+                        });
+                        
+                        if (data.error) {
+                            debugHtml += `<br><div style="color: #ef4444; font-weight: bold;">❌ ERROR: ${data.error}</div>`;
+                        }
+                        
+                        debugContent.innerHTML = debugHtml;
+                        
+                    } catch (error) {
+                        console.error('[DEBUG] Simple test error:', error);
+                        debugContent.innerHTML = `
+                            <div style="color: #ef4444; font-weight: bold;">❌ SIMPLE TEST FAILED</div>
+                            <div style="color: #e5e7eb;">Error: ${error.message}</div>
+                        `;
+                    }
+                    
+                    // Reset button
+                    testBtn.innerHTML = '<i class="fas fa-flask"></i> Simple Firebase Test';
+                    testBtn.disabled = false;
+                });
+            }
+            
+            // Original fetch button (existing code)
+            fetchBtn.addEventListener('click', async function() {
+                console.log('[DEBUG] Fetch devices button clicked');
+                
+                // Show loading state
+                fetchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching...';
+                fetchBtn.disabled = true;
+                
+                // Show debug output area
+                debugOutput.style.display = 'block';
+                debugContent.innerHTML = '<div style="color: #fbbf24;">🔄 Connecting to Firebase...</div>';
+                
+                try {
+                    console.log('[DEBUG] Sending fetch request to /api/fetch-devices-debug');
+                    
+                    // Add timeout to the fetch request
+                    const timeoutController = new AbortController();
+                    const timeoutId = setTimeout(() => timeoutController.abort(), 15000); // 15 second timeout
+                    
+                    const response = await fetch('/api/fetch-devices-debug', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        signal: timeoutController.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    console.log('[DEBUG] Response status:', response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('[DEBUG] Response data:', data);
+                    
+                    // Display detailed debug information
+                    let debugHtml = '';
+                    
+                    if (data.success) {
+                        debugHtml += `<div style="color: #10b981; font-weight: bold;">✅ SUCCESS: Firebase Connection Established</div><br>`;
+                        debugHtml += `<div style="color: #60a5fa;">👤 User ID: ${data.user_id}</div>`;
+                        debugHtml += `<div style="color: #60a5fa;">📱 Devices Found: ${data.device_count}</div>`;
+                        debugHtml += `<div style="color: #60a5fa;">⏰ Timestamp: ${data.timestamp}</div><br>`;
+                        
+                        // Debug steps
+                        debugHtml += `<div style="color: #fbbf24; font-weight: bold;">🔧 DEBUG STEPS:</div>`;
+                        data.debug_info.steps.forEach((step, index) => {
+                            debugHtml += `<div style="margin-left: 10px; color: #e5e7eb;">${step}</div>`;
+                        });
+                        
+                        debugHtml += `<br><div style="color: #fbbf24; font-weight: bold;">📋 DEVICE DATA:</div>`;
+                        
+                        if (data.devices && data.devices.length > 0) {
+                            data.devices.forEach((device, index) => {
+                                debugHtml += `<div style="margin-left: 10px; border-left: 2px solid #10b981; padding-left: 10px; margin: 10px 0;">`;
+                                debugHtml += `<div style="color: #10b981; font-weight: bold;">Device ${index + 1}:</div>`;
+                                debugHtml += `<div style="color: #e5e7eb;">ID: ${device.deviceId || 'N/A'}</div>`;
+                                debugHtml += `<div style="color: #e5e7eb;">Name: ${device.deviceInfo?.deviceName || 'Unknown'}</div>`;
+                                debugHtml += `<div style="color: #e5e7eb;">Model: ${device.deviceInfo?.deviceModel || 'Unknown'}</div>`;
+                                debugHtml += `<div style="color: #e5e7eb;">Brand: ${device.deviceInfo?.brand || 'Unknown'}</div>`;
+                                debugHtml += `<div style="color: #e5e7eb;">Active: ${device.isActive ? '🟢 Yes' : '🔴 No'}</div>`;
+                                debugHtml += `<div style="color: #e5e7eb;">Last Seen: ${device.lastSeenAt || 'Never'}</div>`;
+                                debugHtml += `<div style="color: #e5e7eb;">Android Version: ${device.androidVersion || 'Unknown'}</div>`;
+                                debugHtml += `<div style="color: #e5e7eb;">App Version: ${device.appVersion || 'Unknown'}</div>`;
+                                debugHtml += `</div>`;
+                            });
+                        } else {
+                            debugHtml += `<div style="margin-left: 10px; color: #fbbf24;">⚠️ No devices found in Firebase</div>`;
+                        }
+                        
+                    } else {
+                        debugHtml += `<div style="color: #ef4444; font-weight: bold;">❌ ERROR: ${data.error}</div><br>`;
+                        if (data.debug_info) {
+                            debugHtml += `<div style="color: #fbbf24; font-weight: bold;">🔧 DEBUG INFO:</div>`;
+                            debugHtml += `<div style="color: #e5e7eb;">${JSON.stringify(data.debug_info, null, 2)}</div>`;
+                        }
+                    }
+                    
+                    debugContent.innerHTML = debugHtml;
+                    
+                } catch (error) {
+                    console.error('[DEBUG] Fetch error:', error);
+                    
+                    let errorHtml = '';
+                    if (error.name === 'AbortError') {
+                        errorHtml = `
+                            <div style="color: #ef4444; font-weight: bold;">⏰ REQUEST TIMEOUT</div>
+                            <div style="color: #e5e7eb;">The Firebase query took longer than 15 seconds</div>
+                            <div style="color: #fbbf24;">This might indicate:</div>
+                            <div style="color: #e5e7eb; margin-left: 10px;">• Large number of devices in Firebase</div>
+                            <div style="color: #e5e7eb; margin-left: 10px;">• Slow network connection</div>
+                            <div style="color: #e5e7eb; margin-left: 10px;">• Firebase server issues</div>
+                            <div style="color: #fbbf24;">Try again or check Firebase console</div>
+                        `;
+                    } else {
+                        errorHtml = `
+                            <div style="color: #ef4444; font-weight: bold;">❌ NETWORK ERROR</div>
+                            <div style="color: #e5e7eb;">Error: ${error.message}</div>
+                            <div style="color: #fbbf24;">Check browser console for more details</div>
+                            <div style="color: #e5e7eb; margin-top: 10px;">Common causes:</div>
+                            <div style="color: #e5e7eb; margin-left: 10px;">• Server is not running</div>
+                            <div style="color: #e5e7eb; margin-left: 10px;">• Authentication issues</div>
+                            <div style="color: #e5e7eb; margin-left: 10px;">• Firebase configuration problems</div>
+                        `;
+                    }
+                    
+                    debugContent.innerHTML = errorHtml;
+                }
+                
+                // Reset button
+                fetchBtn.innerHTML = '<i class="fas fa-download"></i> Fetch Devices from Firebase';
+                fetchBtn.disabled = false;
+            });
+        }
+        
+        // Simple Connection Test Function
+        function testSimpleConnection() {
+            const simpleBtn = document.getElementById('testSimpleConnBtn');
+            const debugOutput = document.getElementById('fetchDebugOutput');
+            const debugContent = document.getElementById('debugContent');
+            
+            // Show output and update button
+            debugOutput.style.display = 'block';
+            simpleBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+            simpleBtn.disabled = true;
+            
+            debugContent.innerHTML = '<div style="color: #fbbf24;">🔄 Testing basic Firebase connectivity...</div>';
+            
+            fetch('/api/test-simple-connection', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                let debugHtml = '';
+                
+                if (data.success) {
+                    debugHtml += `<div style="color: #10b981; font-weight: bold;">🎉 SIMPLE CONNECTION TEST PASSED!</div>`;
+                } else {
+                    debugHtml += `<div style="color: #ef4444; font-weight: bold;">❌ SIMPLE CONNECTION TEST FAILED</div>`;
+                }
+                
+                debugHtml += `<div style="color: #e5e7eb; margin-top: 10px;">📊 Test Summary:</div>`;
+                debugHtml += `<div style="color: #e5e7eb;">• Total tests: ${data.summary?.total_tests || 0}</div>`;
+                debugHtml += `<div style="color: #e5e7eb;">• Passed tests: ${data.summary?.passed_tests || 0}</div>`;
+                
+                if (data.tests) {
+                    data.tests.forEach((test, index) => {
+                        debugHtml += `<div style="margin-top: 15px; padding: 10px; background: #374151; border-radius: 5px;">`;
+                        debugHtml += `<div style="color: #fbbf24; font-weight: bold;">Test ${index + 1}: ${test.test}</div>`;
+                        
+                        if (test.result.success) {
+                            debugHtml += `<div style="color: #10b981;">✅ PASSED</div>`;
+                        } else {
+                            debugHtml += `<div style="color: #ef4444;">❌ FAILED: ${test.result.error}</div>`;
+                        }
+                        
+                        if (test.result.logs) {
+                            test.result.logs.forEach(log => {
+                                debugHtml += `<div style="margin-left: 10px; color: #9ca3af;">${log}</div>`;
+                            });
+                        }
+                        
+                        debugHtml += `</div>`;
+                    });
+                }
+                
+                debugContent.innerHTML = debugHtml;
+            })
+            .catch(error => {
+                debugContent.innerHTML = `<div style="color: #ef4444;">❌ Simple connection test error: ${error.message}</div>`;
+            })
+            .finally(() => {
+                simpleBtn.innerHTML = '<i class="fas fa-wifi"></i> 2. Simple Connection';
+                simpleBtn.disabled = false;
+            });
+        }
+        
+        // Web SDK Test Function
+        function testWebSDK() {
+            const webSDKBtn = document.getElementById('testWebSDKBtn');
+            const debugOutput = document.getElementById('fetchDebugOutput');
+            const debugContent = document.getElementById('debugContent');
+            
+            // Show output and update button
+            debugOutput.style.display = 'block';
+            webSDKBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+            webSDKBtn.disabled = true;
+            
+            debugContent.innerHTML = '<div style="color: #fbbf24;">🔄 Initializing Firebase Web SDK...</div>';
+            
+            // First check session
+            fetch('/api/test-web-sdk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(sessionData => {
+                if (!sessionData.success) {
+                    debugContent.innerHTML = `<div style="color: #ef4444;">❌ Session validation failed: ${sessionData.error}</div>`;
+                    return;
+                }
+                
+                debugContent.innerHTML += `<div style="color: #10b981;">✅ Session valid for user: ${sessionData.user_id}</div>`;
+                
+                // Initialize Firebase Web Client
+                return window.firebaseWebClient.testConnection();
+            })
+            .then(result => {
+                if (result) {
+                    let debugHtml = debugContent.innerHTML;
+                    
+                    result.logs.forEach(log => {
+                        debugHtml += `<div>${log}</div>`;
+                    });
+                    
+                    if (result.success) {
+                        debugHtml += `<div style="color: #10b981; font-weight: bold; margin-top: 10px;">🎉 WEB SDK TEST SUCCESSFUL!</div>`;
+                        
+                        // If successful, try to fetch devices
+                        debugHtml += `<div style="color: #fbbf24; margin-top: 10px;">🔄 Now fetching user devices...</div>`;
+                        debugContent.innerHTML = debugHtml;
+                        
+                        return window.firebaseWebClient.fetchUserDevicesWeb(sessionData.user_id);
+                    } else {
+                        debugHtml += `<div style="color: #ef4444; font-weight: bold;">❌ WEB SDK TEST FAILED: ${result.error}</div>`;
+                        debugContent.innerHTML = debugHtml;
+                        return null;
+                    }
+                }
+            })
+            .then(deviceResult => {
+                if (deviceResult) {
+                    let debugHtml = debugContent.innerHTML;
+                    
+                    deviceResult.logs.forEach(log => {
+                        debugHtml += `<div>${log}</div>`;
+                    });
+                    
+                    if (deviceResult.success) {
+                        debugHtml += `<div style="color: #10b981; font-weight: bold; margin-top: 10px;">🎉 DEVICE FETCH SUCCESSFUL!</div>`;
+                        debugHtml += `<div style="color: #e5e7eb;">Found ${deviceResult.devices.length} devices</div>`;
+                        
+                        deviceResult.devices.forEach((device, index) => {
+                            debugHtml += `<div style="margin-left: 10px; color: #60a5fa;">📱 Device ${index + 1}: ${device.deviceId || 'Unknown'}</div>`;
+                        });
+                    } else {
+                        debugHtml += `<div style="color: #ef4444;">❌ Device fetch failed: ${deviceResult.error}</div>`;
+                    }
+                    
+                    debugContent.innerHTML = debugHtml;
+                }
+            })
+            .catch(error => {
+                debugContent.innerHTML += `<div style="color: #ef4444;">❌ Web SDK test error: ${error.message}</div>`;
+            })
+            .finally(() => {
+                webSDKBtn.innerHTML = '<i class="fas fa-globe"></i> 3. Web SDK Test';
+                webSDKBtn.disabled = false;
+            });
+        }
+        
+        // REST API Test Function  
+        function testRESTAPI() {
+            const restBtn = document.getElementById('testRESTAPIBtn');
+            const debugOutput = document.getElementById('fetchDebugOutput');
+            const debugContent = document.getElementById('debugContent');
+            
+            // Show output and update button
+            debugOutput.style.display = 'block';
+            restBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+            restBtn.disabled = true;
+            
+            debugContent.innerHTML = '<div style="color: #fbbf24;">🔄 Testing Firebase REST API...</div>';
+            
+            // Call a special REST API test endpoint
+            fetch('/api/fetch-devices-debug', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ strategy: 'rest_only' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let debugHtml = '';
+                
+                if (data.strategies_results && data.strategies_results.rest_api) {
+                    const restResult = data.strategies_results.rest_api;
+                    
+                    if (restResult.logs) {
+                        restResult.logs.forEach(log => {
+                            debugHtml += `<div>${log}</div>`;
+                        });
+                    }
+                    
+                    if (restResult.success) {
+                        debugHtml += `<div style="color: #10b981; font-weight: bold; margin-top: 10px;">🎉 REST API TEST SUCCESSFUL!</div>`;
+                        debugHtml += `<div style="color: #e5e7eb;">Found ${restResult.devices ? restResult.devices.length : 0} devices</div>`;
+                    } else {
+                        debugHtml += `<div style="color: #ef4444; font-weight: bold;">❌ REST API TEST FAILED</div>`;
+                        debugHtml += `<div style="color: #ef4444;">Error: ${restResult.error}</div>`;
+                    }
+                } else if (data.success) {
+                    debugHtml += `<div style="color: #10b981;">✅ REST API call succeeded</div>`;
+                    if (data.logs) {
+                        data.logs.forEach(log => debugHtml += `<div>${log}</div>`);
+                    }
+                } else {
+                    debugHtml += `<div style="color: #ef4444;">❌ REST API test failed: ${data.error}</div>`;
+                }
+                
+                debugContent.innerHTML = debugHtml;
+            })
+            .catch(error => {
+                debugContent.innerHTML = `<div style="color: #ef4444;">❌ REST API test error: ${error.message}</div>`;
+            })
+            .finally(() => {
+                restBtn.innerHTML = '<i class="fas fa-link"></i> 4. REST API Test';
+                restBtn.disabled = false;
+            });
+        }
+        
+        // Initialize debug functionality when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initDebugDeviceFetch();
+            
+            // Add event listeners for new buttons
+            document.getElementById('testSimpleConnBtn').addEventListener('click', testSimpleConnection);
+            document.getElementById('testWebSDKBtn').addEventListener('click', testWebSDK);
+            document.getElementById('testRESTAPIBtn').addEventListener('click', testRESTAPI);
+            
+            // Add debug data button listener
+            document.getElementById('debugDataBtn').addEventListener('click', debugDeviceData);
+            
+            // Add event listener for Load Devices button
+            const loadDevicesBtn = document.getElementById('loadDevicesBtn');
+            if (loadDevicesBtn) {
+                loadDevicesBtn.addEventListener('click', loadDevicesFromFirebase);
+            }
+        });
+        
+        // Debug Device Data Function
+        function debugDeviceData() {
+            const debugBtn = document.getElementById('debugDataBtn');
+            const debugOutput = document.getElementById('fetchDebugOutput');
+            const debugContent = document.getElementById('debugContent');
+            
+            // Show output and update button
+            debugOutput.style.display = 'block';
+            debugBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Inspecting...';
+            debugBtn.disabled = true;
+            
+            debugContent.innerHTML = '<div style="color: #fbbf24;">🔬 Fetching raw device data structure...</div>';
+            
+            fetch('/api/debug-device-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                let debugHtml = '';
+                
+                if (data.success) {
+                    debugHtml += `<div style="color: #10b981; font-weight: bold;">🔬 RAW DEVICE DATA INSPECTION</div>`;
+                    debugHtml += `<div style="color: #e5e7eb; margin-top: 10px;">📊 Found ${data.device_count} devices</div>`;
+                    
+                    if (data.sample_device) {
+                        debugHtml += `<div style="color: #fbbf24; margin-top: 15px; font-weight: bold;">📱 SAMPLE DEVICE STRUCTURE:</div>`;
+                        debugHtml += `<div style="background: #374151; padding: 10px; margin: 10px 0; border-radius: 5px; font-family: monospace; font-size: 11px; white-space: pre-wrap; overflow-x: auto;">${JSON.stringify(data.sample_device, null, 2)}</div>`;
+                    }
+                    
+                    if (data.all_device_keys && data.all_device_keys.length > 0) {
+                        debugHtml += `<div style="color: #fbbf24; margin-top: 15px; font-weight: bold;">🔑 DEVICE DATA KEYS:</div>`;
+                        data.all_device_keys.forEach((keys, index) => {
+                            debugHtml += `<div style="color: #60a5fa; margin-left: 10px;">Device ${index + 1}: [${keys.join(', ')}]</div>`;
+                        });
+                    }
+                    
+                } else {
+                    debugHtml += `<div style="color: #ef4444; font-weight: bold;">❌ INSPECTION FAILED</div>`;
+                    debugHtml += `<div style="color: #ef4444;">Error: ${data.error}</div>`;
+                    
+                    if (data.logs) {
+                        data.logs.forEach(log => {
+                            debugHtml += `<div style="color: #9ca3af;">${log}</div>`;
+                        });
+                    }
+                }
+                
+                debugContent.innerHTML = debugHtml;
+            })
+            .catch(error => {
+                debugContent.innerHTML = `<div style="color: #ef4444;">❌ Inspection error: ${error.message}</div>`;
+            })
+            .finally(() => {
+                debugBtn.innerHTML = '<i class="fas fa-microscope"></i> 🔬 Inspect Raw Device Data';
+                debugBtn.disabled = false;
+            });
+        }
+        
+        // Load Devices from Firebase Function
+        function loadDevicesFromFirebase() {
+            const loadBtn = document.getElementById('loadDevicesBtn');
+            const statusDiv = document.getElementById('loadDevicesStatus');
+            
+            // Update button state
+            loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Devices...';
+            loadBtn.disabled = true;
+            
+            // Show status
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = '#fef3c7';
+            statusDiv.style.color = '#92400e';
+            statusDiv.innerHTML = '🔄 Fetching your devices from Firebase...';
+            
+            fetch('/api/fetch-devices-production', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.devices && data.devices.length > 0) {
+                    // Success - display devices
+                    statusDiv.style.background = '#d1fae5';
+                    statusDiv.style.color = '#065f46';
+                    statusDiv.innerHTML = `🎉 Successfully loaded ${data.count} device${data.count !== 1 ? 's' : ''}! Refreshing page...`;
+                    
+                    // Refresh page after short delay to show devices
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                    
+                } else if (data.success && data.devices && data.devices.length === 0) {
+                    // No devices found
+                    statusDiv.style.background = '#fef3c7';
+                    statusDiv.style.color = '#92400e';
+                    statusDiv.innerHTML = '📱 No devices found in your Firebase account. Make sure your Android app has uploaded device information.';
+                    
+                } else {
+                    // Error occurred
+                    statusDiv.style.background = '#fee2e2';
+                    statusDiv.style.color = '#991b1b';
+                    statusDiv.innerHTML = `❌ Failed to load devices: ${data.error || 'Unknown error'}`;
+                }
+            })
+            .catch(error => {
+                console.error('Load devices error:', error);
+                statusDiv.style.background = '#fee2e2';
+                statusDiv.style.color = '#991b1b';
+                statusDiv.innerHTML = `❌ Error loading devices: ${error.message}`;
+            })
+            .finally(() => {
+                // Reset button
+                loadBtn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Load My Devices from Firebase';
+                loadBtn.disabled = false;
+            });
+        }
+        
+        // Debug Device Data Function
+        function debugDeviceData() {
+            const debugBtn = document.getElementById('debugDataBtn');
+            const debugOutput = document.getElementById('fetchDebugOutput');
+            const debugContent = document.getElementById('debugContent');
+            
+            // Show output and update button
+            debugOutput.style.display = 'block';
+            debugBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Inspecting...';
+            debugBtn.disabled = true;
+            
+            debugContent.innerHTML = '<div style="color: #fbbf24;">🔬 Fetching raw device data structure...</div>';
+            
+            fetch('/api/debug-device-data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                let debugHtml = '';
+                
+                if (data.success) {
+                    debugHtml += `<div style="color: #10b981; font-weight: bold;">🔬 RAW DEVICE DATA INSPECTION</div>`;
+                    debugHtml += `<div style="color: #e5e7eb; margin-top: 10px;">📊 Found ${data.device_count} devices</div>`;
+                    
+                    if (data.sample_device) {
+                        debugHtml += `<div style="color: #fbbf24; margin-top: 15px; font-weight: bold;">📱 SAMPLE DEVICE STRUCTURE:</div>`;
+                        debugHtml += `<div style="background: #374151; padding: 10px; margin: 10px 0; border-radius: 5px; font-family: monospace; font-size: 11px; white-space: pre-wrap; overflow-x: auto;">${JSON.stringify(data.sample_device, null, 2)}</div>`;
+                    }
+                    
+                    if (data.all_device_keys && data.all_device_keys.length > 0) {
+                        debugHtml += `<div style="color: #fbbf24; margin-top: 15px; font-weight: bold;">🔑 DEVICE DATA KEYS:</div>`;
+                        data.all_device_keys.forEach((keys, index) => {
+                            debugHtml += `<div style="color: #60a5fa; margin-left: 10px;">Device ${index + 1}: [${keys.join(', ')}]</div>`;
+                        });
+                    }
+                    
+                } else {
+                    debugHtml += `<div style="color: #ef4444; font-weight: bold;">❌ INSPECTION FAILED</div>`;
+                    debugHtml += `<div style="color: #ef4444;">Error: ${data.error}</div>`;
+                    
+                    if (data.logs) {
+                        data.logs.forEach(log => {
+                            debugHtml += `<div style="color: #9ca3af;">${log}</div>`;
+                        });
+                    }
+                }
+                
+                debugContent.innerHTML = debugHtml;
+            })
+            .catch(error => {
+                debugContent.innerHTML = `<div style="color: #ef4444;">❌ Inspection error: ${error.message}</div>`;
+            })
+            .finally(() => {
+                debugBtn.innerHTML = '<i class="fas fa-microscope"></i> 🔬 Inspect Raw Device Data';
+                debugBtn.disabled = false;
+            });
+        }
+        
+        // Load Devices from Firebase Function
+        function loadDevicesFromFirebase() {
+            const loadBtn = document.getElementById('loadDevicesBtn');
+            const statusDiv = document.getElementById('loadDevicesStatus');
+            
+            // Update button state
+            loadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Devices...';
+            loadBtn.disabled = true;
+            
+            // Show status
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = '#fef3c7';
+            statusDiv.style.color = '#92400e';
+            statusDiv.innerHTML = '🔄 Fetching your devices from Firebase...';
+            
+            fetch('/api/fetch-devices-production', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.devices && data.devices.length > 0) {
+                    // Success - display devices
+                    statusDiv.style.background = '#d1fae5';
+                    statusDiv.style.color = '#065f46';
+                    statusDiv.innerHTML = `🎉 Successfully loaded ${data.count} device${data.count !== 1 ? 's' : ''}! Refreshing page...`;
+                    
+                    // Refresh page after short delay to show devices
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                    
+                } else if (data.success && data.devices && data.devices.length === 0) {
+                    // No devices found
+                    statusDiv.style.background = '#fef3c7';
+                    statusDiv.style.color = '#92400e';
+                    statusDiv.innerHTML = '📱 No devices found in your Firebase account. Make sure your Android app has uploaded device information.';
+                    
+                } else {
+                    // Error occurred
+                    statusDiv.style.background = '#fee2e2';
+                    statusDiv.style.color = '#991b1b';
+                    statusDiv.innerHTML = `❌ Failed to load devices: ${data.error || 'Unknown error'}`;
+                }
+            })
+            .catch(error => {
+                console.error('Load devices error:', error);
+                statusDiv.style.background = '#fee2e2';
+                statusDiv.style.color = '#991b1b';
+                statusDiv.innerHTML = `❌ Error loading devices: ${error.message}`;
+            })
+            .finally(() => {
+                // Reset button
+                loadBtn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Load My Devices from Firebase';
+                loadBtn.disabled = false;
+            });
+        }
+        
+        // Initialize debug functionality when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initDebugDeviceFetch();
+            
+            // Add event listeners for debug buttons
+            const testSimpleBtn = document.getElementById('testSimpleConnBtn');
+            if (testSimpleBtn) testSimpleBtn.addEventListener('click', testSimpleConnection);
+            
+            const testWebSDKBtn = document.getElementById('testWebSDKBtn');
+            if (testWebSDKBtn) testWebSDKBtn.addEventListener('click', testWebSDK);
+            
+            const testRESTAPIBtn = document.getElementById('testRESTAPIBtn');
+            if (testRESTAPIBtn) testRESTAPIBtn.addEventListener('click', testRESTAPI);
+            
+            // Add debug data button listener
+            const debugDataBtn = document.getElementById('debugDataBtn');
+            if (debugDataBtn) debugDataBtn.addEventListener('click', debugDeviceData);
+            
+            // Add refresh devices button listener
+            const refreshDevicesBtn = document.getElementById('refreshDevicesBtn');
+            if (refreshDevicesBtn) refreshDevicesBtn.addEventListener('click', function() {
+                window.location.reload();
+            });
+            
+            // Add event listener for Load Devices button
+            const loadDevicesBtn = document.getElementById('loadDevicesBtn');
+            if (loadDevicesBtn) loadDevicesBtn.addEventListener('click', loadDevicesFromFirebase);
+        });
     </script>
+    
+    <!-- Firebase Web Client -->
+    <script src="{{ url_for('static', filename='js/firebase_web_client.js') }}"></script>
 </body>
 </html>
